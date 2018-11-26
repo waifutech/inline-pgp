@@ -1,0 +1,54 @@
+body
+  font-size: 12px
+  background-color: whitesmoke
+
+  &:after
+    content: ""
+    display: table
+    clear: both
+
+a
+  cursor: pointer
+  color: $c-primary
+  text-decoration: none
+
+  &:visited
+    color: rgba($c-primary, .8)
+
+  &:hover
+    text-decoration: underline
+
+input, textarea
+  padding: 10px
+  background-color: whitesmoke
+  border: 1px solid transparent
+  border-radius: 1px
+  transition: background-color .1s, border-color .1s
+  box-sizing: border-box
+
+  &:focus
+    border-color: rgba($c-primary, .8)
+    outline: none
+    background-color: white
+
+textarea
+  resize: vertical
+  font-family: initial
+
+textarea[readonly]:focus
+  background-color: whitesmoke
+
+label
+  margin-right: .5em
+
+fieldset
+  border: none
+  padding: 0
+
+legend
+  font-size: 14px
+  margin-bottom: 8px
+  font-weight: bold
+
+button:focus
+  outline: none

@@ -1,0 +1,38 @@
+.id
+  display: flex
+  align-items: end
+
+  &--warn
+    background-color: pink
+    outline: 4px solid pink
+
+  &__icon
+    height: 40px
+    margin-right: 4px
+
+  &__info
+    margin-left: .5em
+    line-height: 20px
+    min-width: 0
+
+  &__id
+    font-family: monospace
+    color: grey
+    font-size: 12px
+
+  &__users
+    white-space: nowrap
+    max-width: calc(100% - 20px)
+    display: inline-block
+    text-overflow: ellipsis
+    overflow: hidden
+    vertical-align: bottom
+
+    &--unknown
+      color: grey
+      font-style: italic
+
+  &__status
+    color: $c-warn
+    font-size: 8px
+    vertical-align: middle

@@ -1,0 +1,11 @@
+*-build.js
+*-build.js.map
+*-build.css
+node_modules/
+.idea/
+dist/*
+packaged/*
+*.pem
+*.crx
+TODO
+screenshot*.png

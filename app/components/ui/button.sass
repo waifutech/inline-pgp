@@ -1,0 +1,50 @@
+.button
+  border: none
+  position: relative
+  font-family: 'Roboto', sans-serif
+  text-transform: uppercase
+  font-weight: bold
+  height: 40px
+  padding: 0 10px
+  cursor: pointer
+  border-radius: 1px
+  color: $c-primary
+
+  &--solid
+    background-color: white
+
+  &--outline
+    background-color: transparent
+    border: 1px solid $c-primary
+
+  &--primary
+    background-color: $c-primary
+    color: white
+
+  &:active, &--pressed
+    background-color: $c-primary
+    color: white
+
+  &:focus
+    outline: none
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.1)
+
+  &:hover
+    text-decoration: underline
+
+  &__spinner
+    margin-top: 5px
+
+.button--primary:active, .button--primary .button--pressed
+  background-color: transparent
+  color: $c-primary
+  border: 1px solid $c-primary
+
+.button--primary
+  &.button--dangerous
+    background-color: $c-warn
+    color: white
+    &:active
+      background-color: transparent
+      color: $c-warn
+      border: 1px solid $c-warn

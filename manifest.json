@@ -1,0 +1,27 @@
+{
+  "name": "Inline PGP",
+  "version": "0.0.2",
+  "description": "Automatically detects and decrypts PGP messages on a web page",
+  "manifest_version": 2,
+  "permissions": ["storage", "contextMenus"],
+  "background": {
+    "scripts": ["dist/background-build.js"],
+    "persistent": false
+  },
+  "content_scripts": [{
+    "js": ["dist/content-build.js"],
+    "matches": ["*://*/*"]
+  }],
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "web_accessible_resources": [
+    "frame.html", "dist/frame-build.js", "dist/frame-build.css"
+  ]
+}
