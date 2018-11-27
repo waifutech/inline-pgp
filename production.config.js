@@ -1,5 +1,5 @@
-const path = require('path')
-const CleanPlugin = require('clean-webpack-plugin')
+// const path = require('path')
+// const CleanPlugin = require('clean-webpack-plugin')
 const ExtractTextPlugin = require("extract-text-webpack-plugin")
 // const CompressionPlugin = require("compression-webpack-plugin")
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
@@ -41,13 +41,14 @@ module.exports = (opts) => ({
     },
 
     optimization: {
-        minimizer: [new UglifyJsPlugin({
-            uglifyOptions: {
-                output: {
-                    ascii_only: true
-                }
-            }
-        })],
+        minimize: false,
+        // minimizer: [new UglifyJsPlugin({
+        //     uglifyOptions: {
+        //         output: {
+        //             ascii_only: true
+        //         }
+        //     }
+        // })],
         namedModules: true,
     },
 

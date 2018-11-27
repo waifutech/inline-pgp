@@ -5,7 +5,7 @@ const Entry = require('./ui/Entry')
 
 const style = require('./keyInfo.sass')
 
-module.exports = class KeyData extends React.Component {
+module.exports = class KeyInfo extends React.Component {
     constructor() {
         super()
         this.state = {}
@@ -21,19 +21,21 @@ module.exports = class KeyData extends React.Component {
 
     render() {
         const {key_, children, ...rest} = this.props
-        const {algorithm, created, fingerprint, params} = key_.primaryKey || key_.subKey
+        const k = key_.primaryKey || key_.subKey || key_
         const {expires} = this.state
-
+        const {algorithm, bits} = k.getAlgorithmInfo()
+        const created = k.getCreationTime()
+        const fingerprint = k.getFingerprint()
         const expired = expires && (expires.getTime() < new Date().getTime())
 
         return (
             <Grid {...rest} n={1} padding={4}>
                 {children}
-                <Entry name={'Algorithm: '}>{algorithm}({params && params[0] && params[0].data.byteLength * 8})</Entry>
+                <Entry name={'Algorithm: '}>{algorithm}({bits})</Entry>
                 <Entry name={'Created: '}>{'' + created}</Entry>
-                <Entry name={'Expires: '}><span className={expired ? style.warn : style.ok}>{expires ? `${expired ? 'Expired ' : ''}${expires}` : 'never'}</span></Entry>
+                <Entry name={'Expires: '}><span className={expired ? style.warn : style.ok}>{expires ? `${expired ? 'expired ' : ''}${expires}` : 'never'}</span></Entry>
                 {fingerprint && <Entry name={'Fingerprint: '}>
-                    <span style={{fontFamily: 'monospace'}}> {Buffer.from(fingerprint).toString('hex').match(/.{4}/g).join(' ')}</span>
+                    <span style={{fontFamily: 'monospace'}}> {fingerprint.match(/.{4}/g).join(' ')}</span>
                  </Entry>}
             </Grid>
         )

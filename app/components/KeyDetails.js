@@ -19,12 +19,12 @@ class KeyDetails  extends React.Component {
     }
 
     render() {
-        const {private_, public_, id, isCurrent, onDelete, onToggleCurrent} = this.props
-        const {expires, showPrivate = false} = this.state
+        const {private_, public_, id} = this.props
+        const {showPrivate = false} = this.state
         const hasPrivate = !!private_
 
         const k = this._key.keys[0]
-        const {users, subKeys, primaryKey} = k
+        const {users, subKeys} = k
 
         return (
             <Grid n={1} padding={10}>
@@ -44,8 +44,8 @@ class KeyDetails  extends React.Component {
 
                         <Entry name={'Subkeys: '}>
                             <Grid n={1} padding={6} style={{marginTop: '6px'}}>
-                                {subKeys.map(sk => <div key={sk.subKey.getKeyId().toHex()}>
-                                    <KeyInfo key_={sk}><Id.Small.Cmp>{sk.subKey.getKeyId().toHex()}</Id.Small.Cmp></KeyInfo>
+                                {subKeys.map(sk => <div key={sk.getKeyId().toHex()}>
+                                    <KeyInfo key_={sk}><Id.Small.Cmp>{sk.getKeyId().toHex()}</Id.Small.Cmp></KeyInfo>
                                 </div>)}
                             </Grid>
                         </Entry>
@@ -59,8 +59,8 @@ class KeyDetails  extends React.Component {
                             {hasPrivate && <Tab active={showPrivate} onClick={() => this.setState({showPrivate: true})}>Private</Tab>}
                         </div>
                         <Fade>
-                            {!showPrivate && <Textarea key={'public'} copy code readOnly style={{width: '100%', resize: 'vertical'}} rows={12}>{public_}</Textarea>}
-                            {showPrivate && <Textarea key={'private'} copy code readOnly style={{width: '100%', resize: 'vertical'}} rows={12}>{private_}</Textarea>}
+                            {!showPrivate && <Textarea key={'public'} copy code readOnly rows={12}>{public_}</Textarea>}
+                            {showPrivate && <Textarea key={'private'} copy code readOnly rows={12}>{private_}</Textarea>}
                         </Fade>
                     </Grid>
                 </Section>

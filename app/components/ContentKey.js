@@ -86,7 +86,7 @@ module.exports = class ContentKey extends React.Component {
                             <div>
                                 <Id hasPrivate={isPrivate} users={users}>{id}</Id>
                                 <div style={{marginBottom: '10px', marginTop: '5px'}}>{this._key.subKeys.map(sk => {
-                                    const id = sk.subKey.getKeyId().toHex()
+                                    const id = sk.getKeyId().toHex()
                                     return <Id.Small.Cmp key={id} style={{marginRight: '1em'}}>{id}</Id.Small.Cmp>
                                 })}</div>
                             </div>

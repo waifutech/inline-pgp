@@ -152,7 +152,7 @@ module.exports = class Keyring {
             fingerprint: Buffer.from(fingerprint).toString('hex'),
             users,
             info,
-            subkeys: subKeys.map(sk => sk.subKey.getKeyId().toHex())
+            subkeys: subKeys.map(sk => sk.getKeyId().toHex())
         }
     }
 
