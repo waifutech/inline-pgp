@@ -66,7 +66,10 @@ module.exports = class ContentKey extends React.Component {
         const id = Keyring.id(key)
         const isPrivate = key.isPrivate()
         const users = key.users.map(({userId: {userid}}) => userid)
-        const hasKey = !!keys().byId(id)
+        const stored = keys().byId(id)
+        const hasPublic = !!stored
+        const hasPrivate = hasPublic && !!stored.private_
+        const hasKey = isPrivate ? hasPrivate : hasPublic
 
         return (<div className={c()}>
             <Grid n={1} padding={0}>

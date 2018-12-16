@@ -10,7 +10,7 @@ pgp.config.debug = true
 const applySettings = () => {
     pgp.config.show_version = !Settings.getHideComments()
     pgp.config.show_comment = !Settings.getHideComments()
-    console.log('applying settings', pgp.config)
+    // console.log('applying settings', pgp.config)
 
     if(document.location.protocol === 'chrome-extension:') {
         pgp.destroyWorker()
