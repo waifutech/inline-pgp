@@ -12,10 +12,10 @@ const Keyring = require('../Keyring')
 const Storage = require('../Storage')
 const {'default': bem} = require('../utils/bem')
 
-const style = require('./inline.sass')
+const style = require('./inline-content.sass')
 const Spinner = require('../svg/Spinner.svg')
 
-const c = bem(style)('inline')
+const c = bem(style)('inline-content')
 
 const keys = () => Keyring.instance()
 

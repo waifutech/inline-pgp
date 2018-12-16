@@ -12,8 +12,16 @@ const fixBlock = (str) => {
         .map((line, i, arr) => {
             if(i === 0)
                 return line
-            if(arr[i-1].includes(':') && !arr[i].includes(':'))
+
+            if(
+                !arr[i].includes(':') &&
+                (
+                    arr[i-1].includes(':') || //last header
+                    i === 1 //message without headers
+                )
+            )
                 return '\n' + line
+
             return line
         })
 
@@ -25,6 +33,7 @@ const validateBlock = (str) => {
         pgp.message.readArmored(str)
         return true
     } catch(err) {
+        // console.log(err, str)
         return false
     }
 }

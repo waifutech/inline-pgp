@@ -63,8 +63,6 @@ const updateDom = (dom) => {
 
         const notransform = ['[contenteditable="true"]', 'textarea', ...Settings.getNotransformForPage()]
 
-        // console.log(notransform)
-
         ;[...pgpNodes]
             .filter(n => !notransform.find(s => !!n.closest(s)))
             .forEach(async n => {
@@ -155,5 +153,3 @@ window.addEventListener('message', (event) => {
     setInterval(() => updateDom(document.body), 1000)
     updateDom(document.body)
 })()
-
-

@@ -17,10 +17,10 @@ const Storage = require('../Storage')
 const DecryptMessage = require('../DecryptMessage')
 const {replacePgpMessages, replacePgpPublicKeys, replacePgpPrivateKeys} = require('../utils/replacePgp')
 
-const style = require('./inline.sass')
+const style = require('./inline-content.sass')
 const Spinner = require('../svg/Spinner.svg')
 
-const c = bem(style)('inline')
+const c = bem(style)('inline-content')
 
 const replaceNewLines = (input) => replace(input, '\n', (original, match) => <br key={match.index}/>)
 

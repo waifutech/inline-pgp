@@ -139,7 +139,9 @@ module.exports = class Keyring {
 
         const users = k.users.map(({userId: {userid}}) => userid)
         const info = users.join('\n')
-        const {primaryKey: {created, fingerprint}, subKeys} = k
+        const fingerprint = k.getFingerprint()
+        const created = k.getCreationTime()
+        const {subKeys} = k
         let expires = await k.getExpirationTime()
         expires = isFinite(expires) ? expires.getTime() : null
 
@@ -149,7 +151,7 @@ module.exports = class Keyring {
             search,
             createdAt: created.getTime(),
             expires,
-            fingerprint: Buffer.from(fingerprint).toString('hex'),
+            fingerprint,
             users,
             info,
             subkeys: subKeys.map(sk => sk.getKeyId().toHex())
