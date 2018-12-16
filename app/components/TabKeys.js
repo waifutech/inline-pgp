@@ -103,7 +103,8 @@ module.exports = class KeysTab extends React.Component {
     }
 
     render() {
-        const {keyInfo, filter, showForm, page, search} = this.state
+        const {keyInfo, filter, showForm, search} = this.state
+        let {page} = this.state
         const {pageSize = 6} = this.props
 
         if(keyInfo) {
@@ -120,9 +121,11 @@ module.exports = class KeysTab extends React.Component {
 
         const filtered = filter === 'PRIVATE' ? filteredPrivate : filteredAll
 
+        const pageCount = Math.ceil(filtered.length / pageSize)
+        if(page > pageCount - 1)
+            page = pageCount - 1
         const st = page*pageSize
         const displayed = filtered.slice(st, st+pageSize)
-        const pageCount = Math.ceil(filtered.length / pageSize)
 
         return (
             <div>

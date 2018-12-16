@@ -15,11 +15,13 @@ const Key = ({
                  onDelete, onClick, ...rest}) => {
     return (
         <div key={id} className={c()} onClick={ev => {
-            if(!(ev.target.closest('button') || ev.target.closest('a')))
+            if(!(ev.target.closest('button') || ev.target.closest('a') || !!getSelection().toString())) {
                 onClick(ev)
+            }
+
         }} {...rest}>
             <div style={{display: 'flex'}}>
-                <div onClick={onClick} style={{maxWidth: '400px'}}><Id>{'' + id}</Id></div>
+                <div style={{maxWidth: '400px'}}><Id>{'' + id}</Id></div>
                 <IconButton title={'Copy public key to clipboard'} onClick={() => {
                     copy(public_)
                     toast('Copied public key')
