@@ -5,6 +5,7 @@ const pgp = require('../pgp')
 const Grid = require('./ui/Grid')
 const {'default': Section} = require('./ui/Section')
 const {'default': Button} = require('./ui/Button')
+const {'default': FileInput} = require('./ui/FileInput')
 const Textarea = require('./ui/Textarea')
 const toast = require('./ui/Toast')
 const {publicKeyBlockRx, privateKeyBlockRx} = require('../utils/replacePgp')
@@ -59,12 +60,20 @@ module.exports = class ImportForm extends React.Component {
                                 onChange={block => this.setState({block})}
                             />
                             <div>
+                                <a style={{float: 'left'}}><FileInput onUpload={f => {
+                                    const reader = new FileReader()
+                                    reader.onload = ev =>
+                                        onSubmit(this.parseKeys(ev.target.result))
+                                    reader.readAsText(f)
+                                }}>Import from file</FileInput></a>
+
                                 <Button primary type='submit' value={'Import'} style={{float: 'right'}}/>
                                 <div style={{clear: 'both'}} />
                             </div>
                         </Grid>
                     </fieldset>
                 </form>
+
             </Section>
         )
     }
