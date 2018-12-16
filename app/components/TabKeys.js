@@ -115,7 +115,10 @@ module.exports = class KeysTab extends React.Component {
             )
         }
 
-        const filtered = keys().find(search, {'private': filter === 'PRIVATE'})
+        const filteredPrivate = keys().find(search, {'private': true})
+        const filteredAll = keys().find(search, {'private': false})
+
+        const filtered = filter === 'PRIVATE' ? filteredPrivate : filteredAll
 
         const st = page*pageSize
         const displayed = filtered.slice(st, st+pageSize)
@@ -125,8 +128,8 @@ module.exports = class KeysTab extends React.Component {
             <div>
                 <div style={{marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                     <span>
-                        <Tab active={filter === 'PRIVATE'} onClick={() => this.filter('PRIVATE')}>Key pairs</Tab>
-                        <Tab active={filter === 'ALL'} onClick={() => this.filter('ALL')}>Public keys</Tab>
+                        <Tab active={filter === 'PRIVATE'} onClick={() => this.filter('PRIVATE')}>Key pairs ({filteredPrivate.length})</Tab>
+                        <Tab active={filter === 'ALL'} onClick={() => this.filter('ALL')}>Public keys ({filteredAll.length})</Tab>
                     </span>
                     <span className={sc()}>
                         <Icon className={sc('icon')}>search</Icon>
