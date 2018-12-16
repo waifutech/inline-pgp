@@ -15,10 +15,6 @@ module.exports = ({value, onChange, ...rest}) => {
                     <label style={{marginRight: '10px'}}>
                         <Checkbox
                             disabled
-                            style={{
-                                position: 'relative',
-                                top: '2px'
-                            }}
                             value={true} /> Encrypt for
                     </label>
                 </td>
@@ -37,10 +33,6 @@ module.exports = ({value, onChange, ...rest}) => {
                 <td style={{whiteSpace: 'nowrap'}}>
                     <label>
                         <Checkbox
-                               style={{
-                                   position: 'relative',
-                                   top: '2px'
-                               }}
                                value={doSign}
                                onChange={doSign => onChange({...value, doSign})}/> Sign with
                     </label>

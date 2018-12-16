@@ -53,15 +53,22 @@ class TabSettings extends React.Component {
                         <Field.Label>
                             <Checkbox
                                 checked={!Settings.isDisabled()}
-                                style={{
-                                    position: 'relative',
-                                    top: '2px'
-                                }}
                                 onChange={async disabled => {
                                     await Settings.setDisabled(!disabled)
                                     this.refresh()
                                 }}
                             /> <span>Enabled</span>
+                        </Field.Label>
+                    </Field>
+                    <Field>
+                        <Field.Label>
+                            <Checkbox
+                                checked={!Settings.getHideComments()}
+                                onChange={async hide => {
+                                    await Settings.setHideComments(!hide)
+                                    this.refresh()
+                                }}
+                            /> <span>Display comment and version</span>
                         </Field.Label>
                     </Field>
                     <Field>

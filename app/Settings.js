@@ -47,6 +47,14 @@ class Settings {
         return Storage.settings().setData('disabled', disabled)
     }
 
+    setHideComments(hide) {
+        return Storage.settings().setData('hideComments', hide)
+    }
+
+    getHideComments() {
+        return Storage.settings().getData('hideComments')
+    }
+
     setDisabledPages(disabledPages) {
         return Storage.settings().setData('disabledPages', filter(disabledPages))
     }
