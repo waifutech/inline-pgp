@@ -68,7 +68,7 @@ class TabSettings extends React.Component {
                                     await Settings.setHideComments(!hide)
                                     this.refresh()
                                 }}
-                            /> <span>Display comment and version</span>
+                            /> <span>Add comment and version headers to PGP blocks</span>
                         </Field.Label>
                     </Field>
                     <Field>

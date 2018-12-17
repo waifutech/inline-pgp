@@ -74,7 +74,7 @@ class Encrypt extends React.Component {
                         />
                     </Grid>
                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <EncryptionSettings style={{maxWidth: '70%'}} value={{encryptionKey, signKey, doSign}} onChange={v => this.setState(v)}/>
+                        <EncryptionSettings style={{maxWidth: '80%'}} value={{encryptionKey, signKey, doSign}} onChange={v => this.setState(v)}/>
                         <Button primary outline disabled={disabled} loading={disabled} type={'submit'}>Encrypt</Button>
                     </div>
                 </Grid>

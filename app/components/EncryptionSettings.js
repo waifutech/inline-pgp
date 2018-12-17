@@ -18,7 +18,7 @@ module.exports = ({value, onChange, ...rest}) => {
                             value={true} /> Encrypt for
                     </label>
                 </td>
-                <td style={{height: '40px', verticalAlign: 'top', maxWidth: '360px'}}>
+                <td style={{height: '40px', verticalAlign: 'top', width: '360px'}}>
                     <KeySelect
                         maxDropHeight={300}
                         style={{display: 'block', height: 0}}

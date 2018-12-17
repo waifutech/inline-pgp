@@ -52,7 +52,7 @@ class ContentEditor extends React.Component {
                 <Grid n={1} padding={10} style={{width: '100%', height: '100%', padding: '10px', boxSizing: 'border-box'}}>
                     <Textarea focus required rows={18} style={{width: '100%', resize: 'none', height: 'calc(100vh - 130px)'}} value={value} onChange={value => this.setState({value})} />
                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <EncryptionSettings style={{maxWidth: '70%'}} value={{encryptionKey, signKey, doSign}} onChange={v => this.setState(v)}/>
+                        <EncryptionSettings style={{maxWidth: '80%'}} value={{encryptionKey, signKey, doSign}} onChange={v => this.setState(v)}/>
                         <Button loading={disabled} disabled={disabled} primary type={'submit'}>Encrypt</Button>
                     </div>
                 </Grid>

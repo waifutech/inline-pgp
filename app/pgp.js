@@ -16,12 +16,13 @@ const applySettings = () => {
         pgp.destroyWorker()
         pgp.initWorker({path: 'lib/openpgp.worker.min.js' })
     }
-
 }
 
-applySettings()
+;(async () => {
+    await Storage.settings().init()
+    applySettings()
+})()
+
 Storage.settings().subscribeChange(applySettings)
-
-
 
 module.exports = pgp
