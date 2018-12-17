@@ -142,6 +142,7 @@ module.exports = class KeysTab extends React.Component {
                             value={search}
                             onChange={ev => this.setState({search: ev.target.value})}
                         />
+                        {!!search && <Icon className={sc('reset')} onClick={() => this.setState({search: ''})}>close</Icon>}
                     </span>
                 </div>
                 {filtered.length ? <div className={c()}>
