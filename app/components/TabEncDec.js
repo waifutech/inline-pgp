@@ -1,4 +1,5 @@
 const React = require('react')
+const {'default': insertAtCursor} = require('insert-text-at-cursor')
 
 const compactObject = require('../utils/compactObject')
 const Keyring = require('../Keyring')
@@ -7,6 +8,7 @@ const DecryptMessage = require('../DecryptMessage')
 const EncryptMessage = require('../EncryptMessage')
 const Grid = require('./ui/Grid')
 const {'default': Section} = require('./ui/Section')
+const {'default': FileInput} = require('./ui/FileInput')
 const Id = require('./ui/Id')
 const Textarea = require('./ui/Textarea')
 const {'default': Button} = require('./ui/Button')
@@ -14,6 +16,7 @@ const {'default': Tab} = require('./ui/Tab')
 const toast = require('./ui/Toast')
 const EncryptionSettings = require('./EncryptionSettings')
 const wait = require('../utils/wait')
+const dataUriRx = require('../utils/dataUriRx')
 
 const keys = () => Keyring.instance()
 
@@ -59,10 +62,14 @@ class Encrypt extends React.Component {
                 <Grid n={1}>
                     <Grid n={2}>
                         <Textarea
+                            ref={ref => {
+                                if(!!ref)
+                                    this._text = ref
+                            }}
                             focus
                             required
                             placeholder={'Plain text'}
-                            style={{resize: 'none', height: '380px'}}
+                            style={{resize: 'none', height: '350px'}}
                             rows={24}
                             onChange={plaintext => onChange({plaintext})}
                             value={plaintext}
@@ -71,11 +78,17 @@ class Encrypt extends React.Component {
                             copy
                             placeholder={'Encrypted message'}
                             code
-                            style={{resize: 'none', height: '380px'}}
+                            style={{resize: 'none', height: '350px'}}
                             rows={24}
                             value={ciphertext}
                         />
                     </Grid>
+                    <a><FileInput multiple onUpload={f => {
+                        const reader  = new FileReader()
+                        reader.readAsDataURL(f)
+                        reader.onloadend = () =>
+                            insertAtCursor(this._text._ref, ` ${dataUriRx.insertParameter(reader.result, 'filename', f.name)} `)
+                    }}>Add files (will be added as data urls)</FileInput></a>
                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
                         <EncryptionSettings style={{maxWidth: '80%'}} value={{encryptionKey, signKey, doSign}} onChange={v => this.setState(v)}/>
                         <Button primary outline disabled={disabled} loading={disabled} type={'submit'}>Encrypt</Button>

@@ -27,7 +27,7 @@ export default class FileInput extends React.Component {
         if(!children || isString(children)) {
             if(!children)
                 children = `Upload file${multiple ? 's' : ''}`
-            children = <div>{children}</div>
+            children = <span>{children}</span>
         }
 
         return (

@@ -13,12 +13,12 @@ class Textarea extends React.Component {
     }
 
     render() {
-        const {children, onChange, copy, code, focus, style = {}, ...rest} = this.props
+        const {children, onChange, copy, code, focus, style = {}, wrapperStyle = {}, ...rest} = this.props
 
         const readOnly = !onChange
 
         return (
-            <div style={{position: 'relative'}}>
+            <div style={{position: 'relative', ...wrapperStyle}}>
             <textarea ref={r => {
                 if(!!r)
                     this._ref = r
