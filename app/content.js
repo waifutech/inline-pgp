@@ -27,18 +27,19 @@ const deepestMatching = (node, condition) => {
     return found
 }
 
-const random = uuid()
+const frameDomId = (id) => `pgp-frame-${id}`
 
-const frameDomId = (id) => `${random}-pgp-frame-${id}`
-
-const frameById = (id) => document.getElementById(frameDomId(id))
+const framesById = (id) => {
+    return [...document.querySelectorAll(`.${frameDomId(id)}`)]
+    // document.getElementById(frameDomId(id))
+}
 
 const mountpoint = (type) => (block) => {
     const id = uuid()
     blocks[id] = block
 
     return `<iframe 
-                    id="${frameDomId(id)}"
+                    class="${frameDomId(id)}"
                     style="min-height: 90px; width: 100%; border: none; margin-top: .25em; margin-bottom: .25em; transition: height 0.1s;" 
                     src="chrome-extension://${cfg.extId}/frame.html?id=${id}&type=${type}">    
             </iframe> `
@@ -125,14 +126,16 @@ chrome.runtime.onMessage.addListener(async (message, sender, cb) => {
 const allowedOrigin = `chrome-extension://${cfg.extId}`
 
 const frameReady = (id) =>
-    frameById(id).contentWindow.postMessage({type: 'PGP_BLOCK', data: blocks[id]}, allowedOrigin)
+    framesById(id).map(f => f.contentWindow.postMessage({type: 'PGP_BLOCK', data: blocks[id]}, allowedOrigin))
 
 
 const frameHeight = (id, height) =>
-    frameById(id).style.height = `${height}px`
+    framesById(id).map(f => f.style.height = `${height}px`)
 
 window.addEventListener('message', (event) => {
     const {data: {type, id, height, data}, origin} = event
+
+    // console.log(event)
 
     if(origin !== allowedOrigin)
         return
