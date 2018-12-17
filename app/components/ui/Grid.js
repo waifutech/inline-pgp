@@ -1,13 +1,9 @@
 const React = require('react')
 
+const compactObject = require('../../utils/compactObject')
 const isNil = require('lodash.isnil')
 const isArray = require('lodash.isarray')
 const compact = require('lodash.compact')
-
-const compactObject = (o, condition = v => isNil(v)) => {
-    Object.keys(o).filter(k => condition(o[k])).forEach(k => delete o[k])
-    return o
-}
 
 const arr = (v) => isArray(v) ? v : (isNil(v) ? [] : [v])
 

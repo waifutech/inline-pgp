@@ -6,10 +6,10 @@ const ReactDOM = require('react-dom')
 
 const KeyStorage = require('./Keyring.js')
 const Storage = require('./Storage.js')
-const KeysTab = require('./components/TabKeys.js')
+const TabKeys = require('./components/TabKeys.js')
 const Passwords = require('./components/Passwords.js')
-const EncDecTab = require('./components/TabEncDec.js')
-const SettingsTab = require('./components/TabSettings.js')
+const TabEncDec = require('./components/TabEncDec.js')
+const TabSettings = require('./components/TabSettings.js')
 const {'default': Tab} = require('./components/ui/Tab')
 const Fade = require('./components/ui/Fade')
 const Icon = require('./components/ui/Icon')
@@ -25,11 +25,11 @@ const github = 'https://github.com/waifutech/inline-pgp'
 class Popup extends React.Component {
     constructor() {
         super()
-        this.state = {tab: 'KEYS'}
+        this.state = {tab: 'KEYS', encPlaintext: '', encCiphertext: '', decPlaintext: '', decCiphertext: ''}
     }
 
     render() {
-        const {tab} = this.state
+        const {tab, encPlaintext, encCiphertext, decPlaintext, decCiphertext} = this.state
         return (
             <div className={layoutStyle.base}>
                 <Passwords />
@@ -44,9 +44,9 @@ class Popup extends React.Component {
                     <Fade>
                         {(() => {
                             switch(tab) {
-                                case 'KEYS': return <KeysTab key={'keys'}/>
-                                case 'ENCDEC': return <EncDecTab key={'encdec'}/>
-                                case 'SETTINGS': return <SettingsTab key={'settings'} />
+                                case 'KEYS': return <TabKeys key={'keys'}/>
+                                case 'ENCDEC': return <TabEncDec key={'encdec'} {...{encPlaintext, encCiphertext, decPlaintext, decCiphertext}} onChange={diff => this.setState(diff)}/>
+                                case 'SETTINGS': return <TabSettings key={'settings'} />
                                 case 'ABOUT': default: return <div key={'about'}>
                                     <Section><Github size={20} style={{marginRight: '.5em', position: 'relative', top: '5px'}}/> <a href={github}>{github}</a></Section>
                                 </div>

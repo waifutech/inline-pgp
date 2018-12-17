@@ -1,5 +1,6 @@
 const React = require('react')
 
+const compactObject = require('../utils/compactObject')
 const Keyring = require('../Keyring')
 const Settings = require('../Settings')
 const DecryptMessage = require('../DecryptMessage')
@@ -21,13 +22,14 @@ class Encrypt extends React.Component {
         super()
         const ks = keys()
         const signKey = (Settings.getCurrentSignKey() || {}).id
-        this.state = {plaintext: '', encryptionKey: (Settings.getCurrentEncryptionKey() || {}).id, signKey, doSign: !!signKey}
+        this.state = {encryptionKey: (Settings.getCurrentEncryptionKey() || {}).id, signKey, doSign: !!signKey}
     }
 
     async encrypt(ev) {
         ev.preventDefault()
 
-        const {plaintext, encryptionKey, signKey, doSign} = this.state
+        const {plaintext, onChange} = this.props
+        const {encryptionKey, signKey, doSign} = this.state
         const ks = keys()
 
         this.setState({disabled: true}, async () => {
@@ -39,7 +41,7 @@ class Encrypt extends React.Component {
                     doSign && signKey && ks.byId(signKey)
                 )
                 const ciphertext = await enc.perform()
-                this.setState({ciphertext})
+                onChange({ciphertext})
             } catch(err) {
                 toast(err.message)
             } finally {
@@ -49,7 +51,8 @@ class Encrypt extends React.Component {
     }
 
     render() {
-        const {plaintext, ciphertext, disabled, encryptionKey, signKey, doSign} = this.state
+        const {plaintext, ciphertext, onChange} = this.props
+        const {disabled, encryptionKey, signKey, doSign} = this.state
 
         return (
             <form onSubmit={this.encrypt.bind(this)}>
@@ -61,7 +64,7 @@ class Encrypt extends React.Component {
                             placeholder={'Plain text'}
                             style={{resize: 'none', height: '380px'}}
                             rows={24}
-                            onChange={plaintext => this.setState({plaintext})}
+                            onChange={plaintext => onChange({plaintext})}
                             value={plaintext}
                         />
                         <Textarea
@@ -93,7 +96,7 @@ class Decrypt extends React.Component {
     async decrypt(ev) {
         ev.preventDefault()
 
-        const {ciphertext} = this.state
+        const {ciphertext, onChange} = this.props
 
         const decrypt = new DecryptMessage(ciphertext)
 
@@ -103,8 +106,8 @@ class Decrypt extends React.Component {
             try {
                 decryptedWith = decrypt.getKeyId()
                 const {data: plaintext, signatures} = await decrypt.perform()
+                onChange({plaintext})
                 this.setState({
-                    plaintext,
                     signatures: signatures.map(({keyid, valid}) => ({id: Keyring.formatId(keyid), valid})),
                     decryptedWith
                 })
@@ -118,7 +121,8 @@ class Decrypt extends React.Component {
     }
 
     render() {
-        const {ciphertext, plaintext, disabled, signatures = [], decryptedWith} = this.state
+        const {ciphertext, plaintext, onChange} = this.props
+        const {disabled, signatures = [], decryptedWith} = this.state
 
         return (
             <form onSubmit={this.decrypt.bind(this)}>
@@ -131,7 +135,7 @@ class Decrypt extends React.Component {
                             placeholder={'Encrypted message'}
                             style={{resize: 'none', height: '380px'}}
                             rows={24}
-                            onChange={ciphertext => this.setState({ciphertext})} value={ciphertext}
+                            onChange={ciphertext => onChange({ciphertext})} value={ciphertext}
                         />
                         <Textarea
                             copy
@@ -172,6 +176,7 @@ module.exports = class EncDecTab extends React.Component {
 
     render() {
         const {tab} = this.state
+        const {encPlaintext, encCiphertext, decPlaintext, decCiphertext, onChange} = this.props
 
         return (
             <div>
@@ -180,7 +185,15 @@ module.exports = class EncDecTab extends React.Component {
                     <Tab active={tab === 'DEC'} onClick={() => this.setState({tab: 'DEC'})}>Decrypt</Tab>
                 </div>
                 <Section>
-                    {tab === 'ENC' ? <Encrypt key={"ENC"}/> : <Decrypt key={"DEC"} />}
+                    {tab === 'ENC'
+                        ? <Encrypt key={"ENC"}
+                                   {...{plaintext: encPlaintext, ciphertext: encCiphertext}}
+                                   onChange={({plaintext, ciphertext}) => onChange(compactObject({encPlaintext: plaintext, encCiphertext: ciphertext}))}
+                        />
+                        : <Decrypt key={"DEC"}
+                                   {...{plaintext: decPlaintext, ciphertext: decCiphertext}}
+                                   onChange={({plaintext, ciphertext}) => onChange(compactObject({decPlaintext: plaintext, decCiphertext: ciphertext}))}
+                        />}
                 </Section>
             </div>
         )
