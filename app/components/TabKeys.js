@@ -163,6 +163,7 @@ module.exports = class KeysTab extends React.Component {
                     <Fade>
                         {pageCount > 1 && <div style={{textAlign: 'center'}}>
                             <Paginator
+                                forcePage={page}
                                 pageCount={pageCount}
                                 onPageChange={({selected: page}) => this.setState({page})}
                                 containerClassName={pagesStyle.pages}
