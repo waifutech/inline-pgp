@@ -50,7 +50,7 @@ const replaceFiles = (input) => replace(input, dataUriRx(),(original, match) => 
         {contentType.startsWith('image/')
             ? (
                 <div className={p()}>
-                    <Image className={p('image')} inline src={original} size={'160px'} style={{marginBottom: '4px'}} />
+                    <Image className={p('image')} src={original} size={'160px'} style={{marginBottom: '4px'}} />
                     {title}
                 </div>
             ) : title

@@ -1,4 +1,4 @@
-const dataUriRx = () => new RegExp(/data:(([a-z0-9]+\/[a-z0-9]+)(;[a-z0-9\-]+\=[a-z0-9\%\-\_\.\~]+)?)?(;base64)?,([a-z0-9\+\=\/]*)/ig)
+const dataUriRx = () => new RegExp(/data:(([a-z0-9]+\/[a-z0-9]+)(;[a-z0-9\-]+\=[a-z0-9\%\-\_\.\~\)\(]+)?)?(;base64)?,([a-z0-9\+\=\/]*)/ig)
 
 const insertParameter = (dataUri, name, value) => {
     const match = dataUriRx().exec(dataUri)
