@@ -12,7 +12,7 @@ const Image = ({className, style, children, src, width, height, inline, size, ..
         className={className}
         style={{
             position: 'relative',
-            background: `url(${src}) center center / cover no-repeat`,
+            background: `url("${src}") center center / cover no-repeat`,
             maxWidth: '100%',
             ...(inline ? {display: 'inline-block'} : {}),
             ...d,
