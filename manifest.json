@@ -1,6 +1,6 @@
 {
   "name": "Inline PGP",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Automatically detects and decrypts PGP messages on a web page",
   "manifest_version": 2,
   "permissions": ["storage", "contextMenus"],
