@@ -2,12 +2,13 @@ require("babel-core/register")
 require("babel-polyfill")
 
 const {'default': insertAtCursor} = require('insert-text-at-cursor')
-const uuid = require('uuid')
+const {v4: uuid} = require('uuid')
 
 const cfg = require('./config')
 const Storage = require('./Storage')
 const Settings = require('./Settings')
 const innertext = require('./utils/innertext')
+const wait = require('./utils/wait')
 const {'default': replacePgp, msgBlockRx, publicKeyBlockRx, privateKeyBlockRx} = require('./utils/replacePgp')
 
 const blocks = {}
@@ -31,23 +32,24 @@ const frameDomId = (id) => `pgp-frame-${id}`
 
 const framesById = (id) => {
     return [...document.querySelectorAll(`.${frameDomId(id)}`)]
-    // document.getElementById(frameDomId(id))
 }
 
 const mountpoint = (type) => (block) => {
     const id = uuid()
     blocks[id] = block
 
-    return `<iframe 
-                    class="${frameDomId(id)}"
-                    style="min-height: 90px; width: 100%; border: none; margin-top: .25em; margin-bottom: .25em; transition: height 0.1s;" 
-                    src="chrome-extension://${cfg.extId}/frame.html?id=${id}&type=${type}">    
-            </iframe> `
+    return (
+        `<iframe 
+            class="${frameDomId(id)}"
+            style="min-height: 90px; width: 100%; border: none; margin-top: .25em; margin-bottom: .25em; transition: height 0.1s;" 
+            src="chrome-extension://${cfg.extId}/frame.html?id=${id}&type=${type}">    
+        </iframe> `
+    )
 }
 
 
 const updateDom = (dom) => {
-    [
+    ;[
         {rx: msgBlockRx(), mp: mountpoint('message')},
         {rx: publicKeyBlockRx(), mp: mountpoint('key')},
         {rx: privateKeyBlockRx(), mp: mountpoint('key')},
@@ -66,7 +68,7 @@ const updateDom = (dom) => {
 
         ;[...pgpNodes]
             .filter(n => !notransform.find(s => !!n.closest(s)))
-            .forEach(async n => {
+            .forEach(n => {
                 const replaced = replace(n.innerHTML).join('')
                 if(n.innerHTML !== replaced)
                     n.innerHTML = replaced
@@ -135,8 +137,6 @@ const frameHeight = (id, height) =>
 window.addEventListener('message', (event) => {
     const {data: {type, id, height, data}, origin} = event
 
-    // console.log(event)
-
     if(origin !== allowedOrigin)
         return
 
@@ -148,11 +148,24 @@ window.addEventListener('message', (event) => {
 
 }, false)
 
+const safeSetInterval = (fn, interval) => {
+    let loop = true
+    setTimeout(async () => {
+        while(loop) {
+            try {
+                await Promise.resolve(fn())
+            } finally {
+                await wait(interval)
+            }
+        }
+    }, 0)
+    return () => loop = false
+}
+
 ;(async () => {
     await Storage.settings().init()
     if(Settings.isDisabledForPage())
         return
-    // setTimeout(() => updateDom(document.body), 2000)
-    setInterval(() => updateDom(document.body), 1000)
-    updateDom(document.body)
+    // setTimeout(() => updateDom(document.body), 3000)
+    const clear = safeSetInterval(() => updateDom(document.body), 1000)
 })()

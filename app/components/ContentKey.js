@@ -1,7 +1,9 @@
 const pgp = require('../pgp')
 const React = require('react')
+const { useState, useEffect, useRef } = React
 
-const Id = require('./ui/Id')
+const KeyId = require('./KeyId')
+const KeyIdView = require('./KeyIdView')
 const {'default': Button} = require('./ui/Button')
 const Grid = require('./ui/Grid')
 const {'default': Section} = require('./ui/Section')
@@ -19,79 +21,67 @@ const c = bem(style)('inline-content')
 
 const keys = () => Keyring.instance()
 
-module.exports = class ContentKey extends React.Component {
-    constructor() {
-        super()
-        this.state = {inited: false, v: 0}
-    }
+const ContentKey = ({keyBlock}) => {
+    const [inited, setInited] = useState(false)
+    const [error, setError] = useState(false)
+    const [displayRaw, setDisplayRaw] = useState(false)
+    const [v, setV] = useState(0)
+    const keyRef = useRef()
 
-    async componentDidMount() {
-        const {keyBlock} = this.props
+    useEffect(() => {
+        const refresh = () => setV(v + 1)
+        ;(async () => {
+            const read = await pgp.key.readArmored(keyBlock)
+            const err = (read.err || [])[0]
+            if(err) {
+                console.error(err)
+                setError(err)
+                setInited(true)
+                return
+            }
+            keyRef.current = read.keys[0]
+            Storage.keys().subscribeChange(refresh)
+            // window.onfocus = refresh
+            setInited(true)
+        })()
+        return () => Storage.keys().unsubscribeChange(refresh)
+    }, [keyBlock])
 
-        const read = pgp.key.readArmored(keyBlock)
+    if(!inited) return <div className={'center'}><Spinner size={32}/></div>
+    if(error) return <div>{''+error}</div>
 
-        const err = (read.err || [])[0]
+    const key = keyRef.current
+    const id = Keyring.id(key)
+    const isPrivate = key.isPrivate()
+    const users = key.users.map(({userId: {userid}}) => userid)
+    const stored = keys().byId(id)
+    const hasPublic = !!stored
+    const hasPrivate = hasPublic && !!stored.private_
+    const hasKey = isPrivate ? hasPrivate : hasPublic
 
-        if(err) {
-            console.log(err)
-            this.setState({inited: true, err})
-            return
-        }
-
-        this._key = read.keys[0]
-
-        this._refresh = this.refresh.bind(this)
-        Storage.keys().subscribeChange(this._refresh)
-        // window.onfocus = this.refresh.bind(this)
-
-        this.setState({inited: true, raw: false})
-    }
-
-    componentWillUnmount() {
-        Storage.keys().unsubscribeChange(this._refresh)
-    }
-
-    refresh() {
-        this.setState({v: this.state.v+1})
-    }
-
-    render() {
-        const {keyBlock} = this.props
-        const {inited, v, raw, err} = this.state
-
-        if(!inited) return <div className={'center'}><Spinner size={32}/></div>
-        if(err) return <div>{''+err}</div>
-
-        const key = this._key
-        const id = Keyring.id(key)
-        const isPrivate = key.isPrivate()
-        const users = key.users.map(({userId: {userid}}) => userid)
-        const stored = keys().byId(id)
-        const hasPublic = !!stored
-        const hasPrivate = hasPublic && !!stored.private_
-        const hasKey = isPrivate ? hasPrivate : hasPublic
-
-        return (<div className={c()}>
+    return (
+        <div className={c()}>
             <Grid n={1} padding={0}>
                 <div>
                     <div>
-                        <Link disabled={!raw} onClick={() => this.setState({raw: false})}><b>Key info</b></Link>
+                        <Link disabled={!displayRaw} onClick={() => setDisplayRaw(false)}><b>Key info</b></Link>
                         {' | '}
-                        <Link disabled={raw} onClick={() => this.setState({raw: true})}><b>Raw</b></Link>
+                        <Link disabled={displayRaw} onClick={() => setDisplayRaw(true)}><b>Raw</b></Link>
                     </div>
                     <div style={{clear: 'both'}}/>
                 </div>
 
                 <Section style={{margin: '10px 0'}}>
-                    {raw
+                    {displayRaw
                         ? <Textarea rows={8} copy code style={{width: '100%', resize: 'vertical'}}>{keyBlock}</Textarea>
-                        : <KeyInfo key_={this._key}>
+                        : <KeyInfo key_={keyRef.current}>
                             <div>
-                                <Id hasPrivate={isPrivate} users={users}>{id}</Id>
-                                <div style={{marginBottom: '10px', marginTop: '5px'}}>{this._key.subKeys.map(sk => {
-                                    const id = sk.getKeyId().toHex()
-                                    return <Id.Small.Cmp key={id} style={{marginRight: '1em'}}>{id}</Id.Small.Cmp>
-                                })}</div>
+                                <KeyId hasPrivate={isPrivate} users={users}>{id}</KeyId>
+                                <div style={{marginBottom: '10px', marginTop: '5px'}}>{keyRef.current.subKeys.map(sk => (
+                                    <KeyIdView.Compact key={id} style={{marginRight: '1em'}}>
+                                        {sk.getKeyId().toHex()}
+                                    </KeyIdView.Compact>
+                                ))}</div>
                             </div>
                         </KeyInfo>}
                 </Section>
@@ -102,6 +92,8 @@ module.exports = class ContentKey extends React.Component {
                         : <Button primary onClick={() => keys().add({[isPrivate ? 'private_' : 'public_']: keyBlock})}>Add to keyring</Button>}
                 </div>
             </Grid>
-        </div>)
-    }
+        </div>
+    )
 }
+
+module.exports = ContentKey

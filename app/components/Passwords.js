@@ -64,7 +64,7 @@ class Passwords extends React.Component {
 
         this.setState({error: null}, async () => {
             try {
-                await pgp.key.readArmored(private_).keys[0].decrypt(password)
+                (await pgp.key.readArmored(private_)).keys[0].decrypt(password)
                 this.setState({id: null}, () => resolvePassword(password))
             } catch(err) {
                 this.setState({error: err.message})

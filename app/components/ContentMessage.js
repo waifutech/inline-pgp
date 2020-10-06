@@ -1,7 +1,9 @@
 const React = require('react')
 const urlRx = require('url-regex')
+const { useEffect, useState, useCallback, Fragment } = React
 
-const Id = require('./ui/Id')
+const KeyId = require('./KeyId')
+const SubkeyId = require('./SubkeyId')
 const Image = require('./ui/Image')
 const Textarea = require('./ui/Textarea')
 const Icon = require('./ui/Icon')
@@ -27,9 +29,11 @@ const p = bem(style)('preview')
 
 const replaceNewLines = (input) => replace(input, '\n', (original, match) => <br key={match.index}/>)
 
-const replaceWithLinks = (input, rx) => replace(input, rx, (original, match) =>
+const replaceWithLinks = rx => input => replace(input, rx, (original, match) =>
     <a href={original} key={'link-' + match.index} target="_blank" rel="nofollow noopener">{original}</a>
 )
+
+const replaceUrls = replaceWithLinks(urlRx())
 
 const replaceFiles = (input) => replace(input, dataUriRx(),(original, match) => {
     let filename = 'file'
@@ -66,40 +70,22 @@ const replacePgpStuff = (text) => {
     return text
 }
 
-module.exports = class ContentMessage extends React.Component {
-    constructor() {
-        super()
-        this.state = {raw: false, inited: false, hasKey: false}
-    }
+const ContentMessage = ({messageBlock: ciphertext}) => {
+    const [plaintext, setPlaintext] = useState()
+    const [signatures, setSignatures] = useState()
+    const [keyId, setKeyId] = useState()
+    const [inited, setInited] = useState(false)
+    const [displayRaw, setDisplayRaw] = useState(false)
+    const [error, setError] = useState()
 
-    async componentDidMount() {
-        const {messageBlock} = this.props
-        this._decrypt = new DecryptMessage(messageBlock)
-        this._check = this.check.bind(this)
-        Storage.session().subscribeChange(this._check)
-        Storage.keys().subscribeChange(this._check)
-        // window.onfocus = this._check
-
-        await this.decrypt()
-    }
-
-    componentWillUnmount() {
-        Storage.session().unsubscribeChange(this._check)
-        Storage.keys().unsubscribeChange(this._check)
-    }
-
-    check() {
-        const {plaintext} = this.state
-        if(!plaintext)
-            this.decrypt()
-    }
-
-    async decrypt() {
+    const decrypt = useCallback(async () => {
         let keyId, hasKey = false
 
+        const decrypt = new DecryptMessage(ciphertext)
+
         try {
-            keyId = this._decrypt.getKeyId()
-            const key = await this._decrypt.pickKey()
+            keyId = await decrypt.getKeyId()
+            const key = await decrypt.pickKey()
             hasKey = !!key
 
             if(hasKey && !!key.private_) {
@@ -107,62 +93,93 @@ module.exports = class ContentMessage extends React.Component {
                 await Passwords.close()
             }
 
-            let {signatures, data: plaintext} = await this._decrypt.perform()
+            let {signatures, data: plaintext} = await decrypt.perform()
 
-            signatures = signatures.map(({keyid, valid}) => ({id: KeyStorage.formatId(keyid), valid}))
-
-            if(!!plaintext)
-                return this.setState({plaintext, signatures})
+            if(!!plaintext) {
+                const displayPlaintext = (
+                    <Fragment>
+                        {
+                            plaintext
+                                |> replacePgpStuff
+                                |> replaceFiles
+                                |> replaceUrls
+                                |> replaceNewLines
+                        }
+                    </Fragment>
+                )
+                setPlaintext(displayPlaintext)
+                signatures = signatures.map(({keyid, valid}) => ({id: KeyStorage.formatId(keyid), valid}))
+                setSignatures(signatures)
+            }
         } catch(err) {
             toast(err.message)
             console.error(err)
-            this.setState({err})
+            setError(err)
         } finally {
-            this.setState({keyId, hasKey, inited: true})
+            setInited(true)
+            setKeyId(keyId)
         }
-    }
+    }, [ciphertext])
 
-    render() {
-        const {raw, plaintext, hasKey, inited, keyId, signatures} = this.state
-        const {messageBlock: ciphertext} = this.props
+    useEffect(() => {
+        const check = () => !plaintext && decrypt()
+        Storage.session().subscribeChange(check)
+        Storage.keys().subscribeChange(check)
+        // window.onfocus = this._check
+        check()
 
-        if(!inited) return <div className={'center'}><Spinner size={32}/></div>
+        return () => {
+            Storage.session().unsubscribeChange(check)
+            Storage.keys().unsubscribeChange(check)
+        }
+    }, [decrypt])
 
-        const decrypted = !!plaintext
+    if(!inited) return <div className={'center'}><Spinner size={32}/></div>
 
-        return (<div className={c({err: !decrypted, ok: decrypted})}>
+    const decrypted = !!plaintext
+
+    return (
+        <div className={c({err: !decrypted, ok: decrypted})}>
             <div>
                 <div className={c('actions')}>
-                    <Link disabled={!raw} onClick={() => this.setState({raw: false})}><b>Decrypted</b></Link>
+                    <Link disabled={!displayRaw} onClick={() => setDisplayRaw(false)}><b>Decrypted</b></Link>
                     {' | '}
-                    <Link disabled={raw} onClick={() => this.setState({raw: true})}><b>Raw</b></Link>
+                    <Link disabled={displayRaw} onClick={() => setDisplayRaw(true)}><b>Raw</b></Link>
                 </div>
                 {signatures &&
-                    <div title={'Signed'} style={{marginTop: '10px'}}>{([...signatures].map(({id, valid}) =>
-                        <div key={id}>
-                            <div style={{marginBottom: '5px', display: 'inline-block'}}>
-                                <Id warn={!valid ? 'Invalid or unknown signature' : null}>{id}</Id>
-                            </div>
+                <div title={'Signed'} style={{marginTop: '10px'}}>{([...signatures].map(({id, valid}) =>
+                    <div key={id}>
+                        <div style={{marginBottom: '5px', display: 'inline-block'}}>
+                            <KeyId warn={!valid ? 'Invalid or unknown signature' : null}>{id}</KeyId>
                         </div>
-                    ))}</div>
+                    </div>
+                ))}</div>
                 }
             </div>
 
             <Section style={{margin: '10px 0'}}>
-                {!raw
+                {!displayRaw
                     ? <div style={{
                         overflowWrap: 'break-word',
                         wordWrap: 'break-word',
                         wordBreak: 'break-word',
                     }}>{decrypted
-                        ? replaceNewLines(replaceWithLinks(replaceFiles(replacePgpStuff(plaintext)), urlRx()))
-                        : <div>{<span><i><span style={{color: 'grey'}}>Encrypted message</span> <a onClick={this.decrypt.bind(this)}>Decrypt</a></i></span>}</div>
+                        ? plaintext
+                        : (
+                            <div><span><i>
+                                <span style={{color: 'grey'}}>Encrypted message</span> <a onClick={decrypt}>Decrypt</a>
+                            </i></span></div>
+                        )
                     }</div>
                     : <div>
                         <Textarea rows={8} copy code style={{resize: 'vertical'}}>{ciphertext}</Textarea>
                     </div>}
             </Section>
-            <div title={'Encrypted'}><Id.Small>{keyId}</Id.Small></div>
-        </div>)
-    }
+            <div title={'Encrypted'}>
+                <SubkeyId>{keyId}</SubkeyId>
+            </div>
+        </div>
+    )
 }
+
+module.exports = ContentMessage

@@ -2,7 +2,7 @@ const React = require('react')
 const ReactDOM = require('react-dom')
 const Autocomplete = require('react-autocomplete')
 
-const Id = require('./Id')
+const KeyId = require('../KeyId')
 const Keyring = require('../../Keyring')
 const Settings = require('../../Settings')
 
@@ -62,7 +62,7 @@ class KeySelect extends React.Component {
                         transition: 'background-color .15s',
                         padding: '4px'
                     }}>
-                        <Id>{id}</Id>
+                        <KeyId>{id}</KeyId>
                     </div>
                 }
                 renderInput={({onBlur, ...rest}) => {
@@ -76,14 +76,14 @@ class KeySelect extends React.Component {
                         boxSizing: 'border-box',
                     }}>
                         {displayId
-                            ? <Id key={value} style={{
+                            ? <KeyId key={value} style={{
                                 cursor: 'pointer',
                                 paddingTop: '2px',
                                 transform: 'scale(0.9) translateY(-2px)',
                                 transformOrigin: 'top left'
                             }} onClick={() =>
                                 this.setState({focused: true}, () => this.focusInput())
-                            }>{value}</Id>
+                            }>{value}</KeyId>
                             : <input
                                 {...rest}
                                 style={{

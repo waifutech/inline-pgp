@@ -1,7 +1,7 @@
 const React = require('react')
 const copy = require('copy-to-clipboard')
 
-const Id = require('./ui/Id')
+const KeyId = require('./KeyId')
 const toast = require('./ui/Toast')
 const {'default': IconButton} = require('./ui/IconButton')
 
@@ -11,7 +11,7 @@ const style = require('./key.sass')
 const c = bem(style)('key')
 
 const Key = ({
-                 key_: {id, private_, public_,addedAt, createdAt},
+                 key_: {id, private_, public_, addedAt, createdAt},
                  onDelete, onClick, ...rest}) => {
     return (
         <div key={id} className={c()} onClick={ev => {
@@ -21,7 +21,7 @@ const Key = ({
 
         }} {...rest}>
             <div style={{display: 'flex'}}>
-                <div style={{maxWidth: '400px'}}><Id>{'' + id}</Id></div>
+                <div style={{maxWidth: '400px'}}><KeyId>{'' + id}</KeyId></div>
                 <IconButton title={'Copy public key to clipboard'} onClick={() => {
                     copy(public_)
                     toast('Copied public key')

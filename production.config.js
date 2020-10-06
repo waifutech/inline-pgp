@@ -1,8 +1,4 @@
-// const path = require('path')
-// const CleanPlugin = require('clean-webpack-plugin')
-const ExtractTextPlugin = require("extract-text-webpack-plugin")
-// const CompressionPlugin = require("compression-webpack-plugin")
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = (opts) => ({
     mode: 'production',
@@ -21,48 +17,41 @@ module.exports = (opts) => ({
             },
             {
                 test: /\.(scss|sass)$/,
-                loader: ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: [
-                        `css-loader?minimize&sourceMap&modules&localIdentName=[name]__[local]__[hash:base64:5]&importLoaders=3`,
-                        'postcss-loader?sourceMap=true',
-                        'resolve-url-loader',
-                        'sass-loader?sourceMap',
-                        {
-                            loader: 'sass-resources-loader',
-                            options: {
-                                resources: ['./app/vars.sass']
-                            }
-                        },
-                    ]
-                })
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: {
+                                localIdentName: '[name]__[local]__[hash:base64:5]',
+                            },
+                            importLoaders: 3,
+                            url: false,
+                        }
+                    },
+                    'postcss-loader?sourceMap=true',
+                    'resolve-url-loader',
+                    'sass-loader?sourceMap',
+                    {
+                        loader: 'sass-resources-loader',
+                        options: {
+                            resources: ['./app/vars.sass']
+                        }
+                    },
+                ]
             },
         ]
     },
 
     optimization: {
         minimize: false,
-        // minimizer: [new UglifyJsPlugin({
-        //     uglifyOptions: {
-        //         output: {
-        //             ascii_only: true
-        //         }
-        //     }
-        // })],
         namedModules: true,
     },
 
     plugins: ([
-        // new CleanPlugin(
-        //     path.join('dist'),
-        //     { root: process.cwd() }
-        // ),
-
-        new ExtractTextPlugin({
-            filename: "[name]-build.css",
-            allChunks: true
+        new MiniCssExtractPlugin({
+            filename: '[name]-build.css',
         }),
-
         // new CompressionPlugin({
         //     test: /\.js$|\.css$/
         // }),

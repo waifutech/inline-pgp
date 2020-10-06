@@ -56,7 +56,7 @@ module.exports = class Keyring {
     }
 
     async add({private_, public_}) {
-        const {keys, err} = pgp.key.readArmored(private_ || public_)
+        const {keys, err} = await pgp.key.readArmored(private_ || public_)
 
         if(err)
             throw err
@@ -135,7 +135,7 @@ module.exports = class Keyring {
     }
 
     async _indexData({id, public_}) {
-        const k = pgp.key.readArmored(public_).keys[0]
+        const k = (await pgp.key.readArmored(public_)).keys[0]
 
         const users = k.users.map(({userId: {userid}}) => userid)
         const info = users.join('\n')

@@ -9,7 +9,7 @@ const EncryptMessage = require('../EncryptMessage')
 const Grid = require('./ui/Grid')
 const {'default': Section} = require('./ui/Section')
 const {'default': FileInput} = require('./ui/FileInput')
-const Id = require('./ui/Id')
+const KeyId = require('./KeyId')
 const Textarea = require('./ui/Textarea')
 const {'default': Button} = require('./ui/Button')
 const {'default': Tab} = require('./ui/Tab')
@@ -23,7 +23,6 @@ const keys = () => Keyring.instance()
 class Encrypt extends React.Component {
     constructor() {
         super()
-        const ks = keys()
         const signKey = (Settings.getCurrentSignKey() || {}).id
         this.state = {encryptionKey: (Settings.getCurrentEncryptionKey() || {}).id, signKey, doSign: !!signKey}
     }
@@ -46,6 +45,7 @@ class Encrypt extends React.Component {
                 const ciphertext = await enc.perform()
                 onChange({ciphertext})
             } catch(err) {
+                console.error(err)
                 toast(err.message)
             } finally {
                 this.setState({disabled: false})
@@ -115,9 +115,8 @@ class Decrypt extends React.Component {
 
         this.setState({disabled: true}, async () => {
             let decryptedWith
-            await wait()
             try {
-                decryptedWith = decrypt.getKeyId()
+                decryptedWith = await decrypt.getKeyId()
                 const {data: plaintext, signatures} = await decrypt.perform()
                 onChange({plaintext})
                 this.setState({
@@ -125,7 +124,7 @@ class Decrypt extends React.Component {
                     decryptedWith
                 })
             } catch(err) {
-                // console.error(err)
+                console.error(err)
                 toast(err.message)
             } finally {
                 this.setState({disabled: false, decryptedWith})
@@ -162,13 +161,13 @@ class Decrypt extends React.Component {
                         <Grid n={!!signatures.length ? 2 : 1} style={{marginRight: '20px', maxWidth: '80%'}}>
                             {decryptedWith && (<div >
                                 <label style={{marginBottom: '6px', display: 'inline-block'}}>Encryption key</label>
-                                <Id>{decryptedWith}</Id>
+                                <KeyId>{decryptedWith}</KeyId>
                             </div>)}
                             {!!signatures.length && (<div>
                                 <label style={{marginBottom: '6px', display: 'inline-block'}}>Signature</label>
                                 <Grid n={1}>{[...signatures].map(({id, valid}) =>
                                     <div key={id}>
-                                        <Id warn={!valid ? 'Invalid or unknown signature' : null}>{id}</Id>
+                                        <KeyId warn={!valid ? 'Invalid or unknown signature' : null}>{id}</KeyId>
                                     </div>)
                                 }</Grid>
                             </div>)}

@@ -6,7 +6,6 @@ const {formatId} = KeyStorage
 const keys = () => KeyStorage.instance()
 
 module.exports = class DecryptMessage {
-
     constructor(ciphertext) {
         this.ciphertext = ciphertext
     }
@@ -18,15 +17,15 @@ module.exports = class DecryptMessage {
         return this.decryptWithKey(key)
     }
 
-    getPgpMessage() {
+    async getPgpMessage() {
         if(!this._pgpMessage)
-            this._pgpMessage = pgp.message.readArmored(this.ciphertext)
+            this._pgpMessage = await pgp.message.readArmored(this.ciphertext)
         return this._pgpMessage
     }
 
-    getKeyId() {
+    async getKeyId() {
         if(!this._keyId) {
-            const message = this.getPgpMessage()
+            const message = await this.getPgpMessage()
             const id = ([...message.packets.map(p => p)].find(p => p.publicKeyId) || {}).publicKeyId
             this._keyId = formatId(id)
         }
@@ -35,7 +34,7 @@ module.exports = class DecryptMessage {
 
     async pickKey() {
         if(!this._key) {
-            const keyId = this.getKeyId(this.ciphertext)
+            const keyId = await this.getKeyId(this.ciphertext)
             if(!keyId)
                 throw new Error('Invalid message')
             this._key = keys().bySubkeyId(keyId)
@@ -54,18 +53,23 @@ module.exports = class DecryptMessage {
         if(!password)
             throw new Error('No password')
 
-        const privateKeys = pgp.key.readArmored(private_).keys
+        const privateKeys = (await pgp.key.readArmored(private_)).keys
         await Promise.all(privateKeys.map(async k => await k.decrypt(password)))
-        const message = this.getPgpMessage()
-        let ret = await pgp.decrypt({message, privateKeys})
-        const {signatures} = ret
-        const publicKeys = (await Promise.all(signatures.map(async ({keyid}) => {
-            const id = KeyStorage.formatId(keyid)
-            const k = keys().byId(id)
-            return !!k ? await pgp.key.readArmored(k.public_).keys[0] : null
-        }))).filter(v => !!v)
+        let message = await this.getPgpMessage()
+        this.result = await pgp.decrypt({ message, privateKeys })
+        const {signatures} = this.result
 
-        this.result = await pgp.decrypt({message, privateKeys, publicKeys})
+        if(!!signatures.length) {
+            this._pgpMessage = null
+            message = await this.getPgpMessage()
+            const publicKeys = (await Promise.all(signatures.map(async ({keyid}) => {
+                const id = KeyStorage.formatId(keyid)
+                const k = keys().byId(id)
+                return !!k ? (await pgp.key.readArmored(k.public_)).keys[0] : null
+            }))).filter(v => !!v)
+
+            this.result = await pgp.decrypt({ message, privateKeys, publicKeys })
+        }
 
         this.result.decryptedWith = keyId
 

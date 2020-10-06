@@ -1,5 +1,5 @@
 const path = require('path')
-const CleanPlugin = require('clean-webpack-plugin')
+const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 
 module.exports = (opts) => ({
     mode: 'development',
@@ -21,7 +21,17 @@ module.exports = (opts) => ({
                 test: /\.(scss|sass)$/,
                 loaders: [
                     'style-loader',
-                    `css-loader?sourceMap&modules&localIdentName=[name]__[local]__[hash:base64:5]&importLoaders`,
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            sourceMap: true,
+                            modules: {
+                                localIdentName: '[name]__[local]__[hash:base64:5]',
+                            },
+                            importLoaders: true,
+                            url: false,
+                        }
+                    },
                     'resolve-url-loader',
                     'sass-loader?sourceMap',
                     {
@@ -35,9 +45,8 @@ module.exports = (opts) => ({
         ]
     },
     plugins: ([
-        new CleanPlugin(
-            path.join('dist'),
-            { root: process.cwd() }
-        ),
+        new CleanWebpackPlugin({
+            cleanBeforeEveryBuildPatterns: ['dist']
+        }),
     ]).filter(p => !!p)
 })

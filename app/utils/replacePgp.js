@@ -2,7 +2,7 @@ const escape = require('escape-html')
 
 const replace = require('./replace')
 const innertext = require('./innertext')
-const pgp = require('../pgp')
+// const pgp = require('../pgp')
 
 const fixBlock = (str) => {
     const ret = str
@@ -28,21 +28,22 @@ const fixBlock = (str) => {
     return escape(ret.join('\n'))
 }
 
-const validateBlock = (str) => {
-    try {
-        pgp.message.readArmored(str)
-        return true
-    } catch(err) {
-        // console.log(err, str)
-        return false
-    }
+const validateBlock = async (str) => {
+    return true
+    // try {
+    //     await pgp.message.readArmored(str)
+    //     return true
+    // } catch(err) {
+    //     // console.log(err, str)
+    //     return false
+    // }
 }
 
 export const msgBlockRx = () => /-----BEGIN PGP MESSAGE-----.+?-----END PGP MESSAGE-----/gms
 export const publicKeyBlockRx = () => /-----BEGIN PGP PUBLIC KEY BLOCK-----.+?-----END PGP PUBLIC KEY BLOCK-----/gms
 export const privateKeyBlockRx = () => /-----BEGIN PGP PRIVATE KEY BLOCK-----.+?-----END PGP PRIVATE KEY BLOCK-----/gms
 
-export const replacePgp = (rx, replaceFn) => (str) => replace(str, rx, (original, match) => {
+export const replacePgp = (rx, replaceFn) => (str) => replace(str, rx,(original, match) => {
     const block = fixBlock(innertext(original))
     return validateBlock(block) ? replaceFn(block, match) : original
 })

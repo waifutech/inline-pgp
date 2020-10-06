@@ -1,6 +1,6 @@
 const React = require('react')
 
-const Id = require('./ui/Id')
+const KeyId = require('./KeyId')
 const Grid = require('./ui/Grid')
 const {'default': Button} = require('./ui/Button')
 const Field = require('./ui/Field')
@@ -39,7 +39,7 @@ class PasswordInput extends React.Component {
         return (
             <form onSubmit={this.submit.bind(this)}>
                 <Grid n={1} padding={small ? 0 : 10}>
-                    <Id style={small && {transform: 'scale(.8)', transformOrigin: 'top left'}}>{id}</Id>
+                    <KeyId style={small && {transform: 'scale(.8)', transformOrigin: 'top left'}}>{id}</KeyId>
                     <div style={{display: 'flex'}}>
                         <Field error={error}>
                             <input

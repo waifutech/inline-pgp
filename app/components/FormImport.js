@@ -1,4 +1,5 @@
 const React = require('react')
+const flatten = require('lodash.flatten')
 
 const pgp = require('../pgp')
 
@@ -16,12 +17,12 @@ module.exports = class ImportForm extends React.Component {
         this.state = {block: ''}
     }
 
-    parseKeys(source) {
-        const parseWithRx = (rx) => {
+    async parseKeys(source) {
+        const parseWithRx = async (rx) => {
             let match, ret = []
 
             while (match = rx.exec(source)) {
-                const {err, keys} = pgp.key.readArmored(match[0])
+                const {err, keys} = await pgp.key.readArmored(match[0])
 
                 if (err) {
                     console.log(err)
@@ -36,9 +37,8 @@ module.exports = class ImportForm extends React.Component {
             return ret
         }
 
-        return [...parseWithRx(publicKeyBlockRx()), ...parseWithRx(privateKeyBlockRx())].reverse()
+        return [publicKeyBlockRx(), privateKeyBlockRx()].map(parseWithRx) |> Promise.all |> await |> flatten
     }
-
 
     render() {
         const {block} = this.state
@@ -48,7 +48,7 @@ module.exports = class ImportForm extends React.Component {
             <Section>
                 <form onSubmit={async (ev) => {
                     ev.preventDefault()
-                    onSubmit(this.parseKeys(block))
+                    onSubmit(await this.parseKeys(block))
                 }}>
                     <fieldset>
                         <legend>Import keys</legend>

@@ -1,4 +1,4 @@
-const merge = require('webpack-merge')
+const { merge } = require('webpack-merge')
 
 const env = process.env.NODE_ENV || 'development'
 

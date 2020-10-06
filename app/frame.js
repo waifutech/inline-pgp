@@ -87,9 +87,11 @@ class Frame extends React.Component {
                 setTimeout(() => send({type: 'PGP_FRAME_HEIGHT', height: document.body.clientHeight}))
             }}
         >
-            <toast.Container clear top={'20px'} />
-            <Passwords />
-            <Frame {...{id, type}}/>
+            <div>
+                <toast.Container clear top={'20px'} />
+                <Passwords />
+                <Frame {...{id, type}}/>
+            </div>
         </ReactResizeDetector>,
         document.getElementById('mountpoint')
     )
