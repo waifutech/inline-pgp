@@ -1,14 +1,15 @@
-const React = require('react')
-const CSSTransitionGroup = require('react-addons-css-transition-group')
+import React from 'react'
+import CSSTransitionGroup from 'react-addons-css-transition-group'
 
-const style = require('./fade.sass')
+import './fade.sass'
 
-module.exports = (props) => {
-    const {children, ...rest} = props
+const Fade = (props) => {
+    const { children, ...rest } = props
+
     return (<CSSTransitionGroup
-        transitionName="fade"
-        transitionAppear={true}
-        transitionEnter={true}
+        transitionName='fade'
+        transitionAppear
+        transitionEnter
         transitionLeave={false}
         transitionAppearTimeout={150}
         transitionEnterTimeout={150}
@@ -17,3 +18,5 @@ module.exports = (props) => {
         {children}
     </CSSTransitionGroup>)
 }
+
+export default Fade

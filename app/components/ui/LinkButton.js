@@ -1,9 +1,12 @@
 import React from 'react'
 
-import bem from '../../utils/bem'
 import style from './linkButton.sass'
+
+import bem from '../../utils/bem'
 
 const c = bem(style)('link-button')
 
-export default ({children, pressed, value, ...rest}) =>
-    <a className={c({pressed})} {...rest}>{children || value}</a>
+const LinkButton = ({ children, pressed, value, ...rest }) =>
+    <a className={c({ pressed })} {...rest}>{children || value}</a>
+
+export default LinkButton

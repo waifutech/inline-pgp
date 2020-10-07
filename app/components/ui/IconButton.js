@@ -1,16 +1,18 @@
 import React from 'react'
 
 import Icon from './Icon'
+import style from './iconButton.sass'
 
 import bem from '../../utils/bem'
-import style from './iconButton.sass'
 
 const c = bem(style)('icon-button')
 
-export default ({children, pressed, value, type, ...rest}) =>
+const IconButton = ({ children, pressed, value, type, ...rest }) =>
     <button
-        className={c({pressed})}
-        {...{...rest, type: !!type ? type : 'button'}}
+        className={c({ pressed })}
+        {...{ ...rest, type: type || 'button' }}
     >
         <Icon className={c('icon')}>{children || value}</Icon>
     </button>
+
+export default IconButton

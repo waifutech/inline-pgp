@@ -1,13 +1,14 @@
-const React = require('react')
-const cn = require('classnames')
+import cn from 'classnames'
+import React from 'react'
 
-const Storage = require('../Storage')
-const KeyStorage = require('../Keyring')
-const pgp = require('../pgp')
+import PasswordInput from './PasswordInput'
+import style from './passwords.sass'
 
-const PasswordInput = require('./PasswordInput')
+import KeyStorage from '../Keyring'
+import pgp from '../pgp'
+import Storage from '../Storage'
 
-const style = require('./passwords.sass')
+
 
 const keys = () => KeyStorage.instance()
 
@@ -15,7 +16,7 @@ const getPassword = (id) => Storage.session().getData(`password_${id}`)
 const storePassword = (id, password) => Storage.session().setData(`password_${id}`, password)
 
 let passwords
-let resolvePassword = null, rejectPassword = null
+let resolvePassword = null; let rejectPassword = null
 
 class Passwords extends React.Component {
     static close() {
@@ -29,20 +30,22 @@ class Passwords extends React.Component {
     static async ensurePassword(id, options) {
         const stored = await getPassword(id)
 
-        if(!!stored)
-            return stored
+        if (stored) { return stored }
 
         const requested = await this.requestPassword(id, options)
+
         await storePassword(id, requested)
+
         return requested
     }
 
     close() {
-        return new Promise((resolve, reject) => this.setState({id: null}, () => resolve()))
+        return new Promise(resolve => this.setState({ id: null }, () => resolve()))
     }
 
-    async requestPassword(id, {dialog} = {}) {
-        this.setState({id, dialog})
+    async requestPassword(id, { dialog } = {}) {
+        this.setState({ id, dialog })
+
         return new Promise((resolve, reject) => {
             resolvePassword = resolve
             rejectPassword = reject
@@ -59,34 +62,34 @@ class Passwords extends React.Component {
     }
 
     async checkPassword(password) {
-        const {id} = this.state
-        const {private_} = keys().byId(id)
+        const { id } = this.state
+        const { private_ } = keys().byId(id)
 
-        this.setState({error: null}, async () => {
+        this.setState({ error: null }, async () => {
             try {
                 (await pgp.key.readArmored(private_)).keys[0].decrypt(password)
-                this.setState({id: null}, () => resolvePassword(password))
-            } catch(err) {
-                this.setState({error: err.message})
+                this.setState({ id: null }, () => resolvePassword(password))
+            } catch (err) {
+                this.setState({ error: err.message })
             }
         })
     }
 
     reject() {
-        this.setState({id: null})
+        this.setState({ id: null })
         rejectPassword()
     }
 
     render() {
-        const {id, error, dialog} = this.state
+        const { id, error, dialog } = this.state
         const small = dialog === 'small'
 
         return (
             <div>
                 {!!id && <div>
-                    <div className={style.backdrop} onClick={this.reject.bind(this)}/>
+                    <div className={style.backdrop} onClick={this.reject.bind(this)} />
                     <div className={cn(style.window, small && style['window--small'])}>
-                        <PasswordInput {...{id, small, error, onSubmit: this.checkPassword.bind(this), onCancel: this.reject.bind(this)}} />
+                        <PasswordInput {...{ id, small, error, onSubmit: this.checkPassword.bind(this), onCancel: this.reject.bind(this) }} />
                     </div>
                 </div>}
             </div>
@@ -94,4 +97,4 @@ class Passwords extends React.Component {
     }
 }
 
-module.exports = Passwords
+export default Passwords

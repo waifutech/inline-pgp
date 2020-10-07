@@ -1,35 +1,40 @@
-const React = require('react')
-const copy = require('copy-to-clipboard')
+import copy from 'copy-to-clipboard'
+import React from 'react'
 
-const KeyId = require('./KeyId')
-const toast = require('./ui/Toast')
-const {'default': IconButton} = require('./ui/IconButton')
+import style from './key.sass'
+import KeyId from './KeyId'
+import IconButton from './ui/IconButton'
+import toast from './ui/Toast'
 
-const {'default': bem} = require('../utils/bem')
-const style = require('./key.sass')
+import bem from '../utils/bem'
 
 const c = bem(style)('key')
 
 const Key = ({
-                 key_: {id, private_, public_, addedAt, createdAt},
-                 onDelete, onClick, ...rest}) => {
+    key_: { id, public_ },
+    onDelete, onClick, ...rest
+}) => {
     return (
-        <div key={id} className={c()} onClick={ev => {
-            if(!(ev.target.closest('button') || ev.target.closest('a') || !!getSelection().toString())) {
-                onClick(ev)
-            }
-
-        }} {...rest}>
-            <div style={{display: 'flex'}}>
-                <div style={{maxWidth: '400px'}}><KeyId>{'' + id}</KeyId></div>
-                <IconButton title={'Copy public key to clipboard'} onClick={() => {
-                    copy(public_)
-                    toast('Copied public key')
-                }} style={{marginLeft: '6px', alignSelf: 'flex-end'}}>file_copy</IconButton>
+        <div
+            key={id} className={c()} onClick={ev => {
+                if (!(ev.target.closest('button') || ev.target.closest('a') || !!getSelection().toString())) {
+                    onClick(ev)
+                }
+            }} {...rest}
+        >
+            <div style={{ display: 'flex' }}>
+                <div style={{ maxWidth: '400px' }}><KeyId>{'' + id}</KeyId></div>
+                <IconButton
+                    title='Copy public key to clipboard' onClick={() => {
+                        copy(public_)
+                        toast('Copied public key')
+                    }} style={{ marginLeft: '6px', alignSelf: 'flex-end' }}
+                >file_copy
+                </IconButton>
             </div>
-            <div><IconButton onClick={onDelete} title={'Delete'}>delete</IconButton></div>
+            <div><IconButton onClick={onDelete} title='Delete'>delete</IconButton></div>
         </div>
     )
 }
 
-module.exports = Key
+export default Key

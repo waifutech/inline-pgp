@@ -1,27 +1,27 @@
-const pgp = require('../pgp')
-const React = require('react')
+import React from 'react'
 const { useState, useEffect, useRef } = React
 
-const KeyId = require('./KeyId')
-const KeyIdView = require('./KeyIdView')
-const {'default': Button} = require('./ui/Button')
-const Grid = require('./ui/Grid')
-const {'default': Section} = require('./ui/Section')
-const Link = require('./ui/Link')
-const KeyInfo = require('./KeyInfo')
-const Textarea = require('./ui/Textarea')
-const Keyring = require('../Keyring')
-const Storage = require('../Storage')
-const {'default': bem} = require('../utils/bem')
+import style from './inline-content.sass'
+import KeyId from './KeyId'
+import KeyIdView from './KeyIdView'
+import KeyInfo from './KeyInfo'
+import Button from './ui/Button'
+import Grid from './ui/Grid'
+import Link from './ui/Link'
+import Section from './ui/Section'
+import Textarea from './ui/Textarea'
 
-const style = require('./inline-content.sass')
-const Spinner = require('../svg/Spinner.svg')
+import Keyring from '../Keyring'
+import pgp from '../pgp'
+import Storage from '../Storage'
+import Spinner from '../svg/Spinner.svg'
+import bem from '../utils/bem'
 
 const c = bem(style)('inline-content')
 
 const keys = () => Keyring.instance()
 
-const ContentKey = ({keyBlock}) => {
+const ContentKey = ({ keyBlock }) => {
     const [inited, setInited] = useState(false)
     const [error, setError] = useState(false)
     const [displayRaw, setDisplayRaw] = useState(false)
@@ -30,13 +30,16 @@ const ContentKey = ({keyBlock}) => {
 
     useEffect(() => {
         const refresh = () => setV(v + 1)
+
         ;(async () => {
             const read = await pgp.key.readArmored(keyBlock)
             const err = (read.err || [])[0]
-            if(err) {
+
+            if (err) {
                 console.error(err)
                 setError(err)
                 setInited(true)
+
                 return
             }
             keyRef.current = read.keys[0]
@@ -44,16 +47,17 @@ const ContentKey = ({keyBlock}) => {
             // window.onfocus = refresh
             setInited(true)
         })()
-        return () => Storage.keys().unsubscribeChange(refresh)
-    }, [keyBlock])
 
-    if(!inited) return <div className={'center'}><Spinner size={32}/></div>
-    if(error) return <div>{''+error}</div>
+        return () => Storage.keys().unsubscribeChange(refresh)
+    }, [keyBlock, v])
+
+    if (!inited) return <div className='center'><Spinner size={32} /></div>
+    if (error) return <div>{'' + error}</div>
 
     const key = keyRef.current
     const id = Keyring.id(key)
     const isPrivate = key.isPrivate()
-    const users = key.users.map(({userId: {userid}}) => userid)
+    const users = key.users.map(({ userId: { userid } }) => userid)
     const stored = keys().byId(id)
     const hasPublic = !!stored
     const hasPrivate = hasPublic && !!stored.private_
@@ -68,32 +72,33 @@ const ContentKey = ({keyBlock}) => {
                         {' | '}
                         <Link disabled={displayRaw} onClick={() => setDisplayRaw(true)}><b>Raw</b></Link>
                     </div>
-                    <div style={{clear: 'both'}}/>
+                    <div style={{ clear: 'both' }} />
                 </div>
 
-                <Section style={{margin: '10px 0'}}>
+                <Section style={{ margin: '10px 0' }}>
                     {displayRaw
-                        ? <Textarea rows={8} copy code style={{width: '100%', resize: 'vertical'}}>{keyBlock}</Textarea>
+                        ? <Textarea rows={8} copy code style={{ width: '100%', resize: 'vertical' }}>{keyBlock}</Textarea>
                         : <KeyInfo key_={keyRef.current}>
                             <div>
                                 <KeyId hasPrivate={isPrivate} users={users}>{id}</KeyId>
-                                <div style={{marginBottom: '10px', marginTop: '5px'}}>{keyRef.current.subKeys.map(sk => (
-                                    <KeyIdView.Compact key={id} style={{marginRight: '1em'}}>
+                                <div style={{ marginBottom: '10px', marginTop: '5px' }}>{keyRef.current.subKeys.map(sk => (
+                                    <KeyIdView.Compact key={id} style={{ marginRight: '1em' }}>
                                         {sk.getKeyId().toHex()}
                                     </KeyIdView.Compact>
-                                ))}</div>
+                                ))}
+                                </div>
                             </div>
                         </KeyInfo>}
                 </Section>
 
                 <div>
                     {hasKey
-                        ? <Link style={{lineHeight: '40px', textTransform: 'uppercase'}} disabled={true}><b>Added to keyring</b></Link>
-                        : <Button primary onClick={() => keys().add({[isPrivate ? 'private_' : 'public_']: keyBlock})}>Add to keyring</Button>}
+                        ? <Link style={{ lineHeight: '40px', textTransform: 'uppercase' }} disabled><b>Added to keyring</b></Link>
+                        : <Button primary onClick={() => keys().add({ [isPrivate ? 'private_' : 'public_']: keyBlock })}>Add to keyring</Button>}
                 </div>
             </Grid>
         </div>
     )
 }
 
-module.exports = ContentKey
+export default ContentKey

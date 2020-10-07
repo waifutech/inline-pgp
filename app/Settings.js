@@ -1,7 +1,7 @@
-const matchWildcard = require('match-url-wildcard')
+import matchWildcard from 'match-url-wildcard'
 
-const cfg = require('./config')
-const Storage = require('./Storage')
+import cfg from './config'
+import Storage from './Storage'
 
 const filter = (lines) => (lines || '').split('\n').map(line => line.trim()).filter(line => !!line).join('\n')
 
@@ -12,8 +12,9 @@ class Settings {
 
     async init() {
         const ss = Storage.settings()
+
         await ss.init()
-        if(!await ss.getData('initialized')) {
+        if (!await ss.getData('initialized')) {
             await this.reset()
             await ss.setData('initialized', true)
         }
@@ -32,10 +33,11 @@ class Settings {
         return this.getNotransform()
             .map(entry => {
                 const [wildcard, ...rest] = entry.split(' ')
+
                 return [wildcard, rest.join(' ')]
             })
             .filter(([wildcard]) => matchWildcard(pageUrl, wildcard))
-            .map(([wc, selector]) => selector)
+            .map(([_, selector]) => selector)
             .filter(v => !!v)
     }
 
@@ -88,4 +90,4 @@ class Settings {
     }
 }
 
-module.exports = new Settings()
+export default new Settings()

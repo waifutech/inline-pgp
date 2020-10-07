@@ -1,8 +1,8 @@
 import React from 'react'
 
-export default ({value, onChange, style, ...rest}) => {
+const Checkbox = ({ value, onChange, style, ...rest }) => {
     return <input
-        type="checkbox"
+        type='checkbox'
         checked={!!value}
         style={{
             position: 'relative',
@@ -16,3 +16,4 @@ export default ({value, onChange, style, ...rest}) => {
     />
 }
 
+export default Checkbox

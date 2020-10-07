@@ -1,13 +1,12 @@
-const orderBy = require('lodash.orderby')
+import orderBy from 'lodash.orderby'
 
-const Storage = require('./Storage')
+import pgp from './pgp'
+import Storage from './Storage'
 
-const pgp = require('./pgp')
-
-module.exports = class Keyring {
+export default class Keyring {
     static instance() {
-        if(!Keyring._instance)
-            Keyring._instance = new Keyring()
+        if (!Keyring._instance) { Keyring._instance = new Keyring() }
+
         return Keyring._instance
     }
 
@@ -24,15 +23,15 @@ module.exports = class Keyring {
         return Object.values(this.storage.values).filter(v => v instanceof Object)
     }
 
-    find(query, {'private': p} = {}) {
-        let ret = this.all().filter(({private_}) => p ? !!private_ : true)
+    find(query, { private: p } = {}) {
+        let ret = this.all().filter(({ private_ }) => p ? !!private_ : true)
 
-        if(!!query) {
+        if (query) {
             query = query.toLowerCase()
-            ret = ret.filter(({search}) => search.toLowerCase().includes(query))
+            ret = ret.filter(({ search }) => search.toLowerCase().includes(query))
         }
 
-        return orderBy(ret, [({addedAt}) => addedAt || '', ({createdAt}) => createdAt || ''], ['desc', 'desc'])
+        return orderBy(ret, [({ addedAt }) => addedAt || '', ({ createdAt }) => createdAt || ''], ['desc', 'desc'])
     }
 
     byId(id) {
@@ -40,11 +39,11 @@ module.exports = class Keyring {
     }
 
     bySubkeyId(id) {
-        //TODO index?
-        return this.all().find(({subkeys}) => subkeys.find(skid => skid === id))
-        // return this.all()
-        //     .find(({public_}) => pgp.key.readArmored(public_).keys[0].subKeys
-        //         .find(sk => sk.subKey.getKeyId().toHex() === id))
+    // TODO index?
+        return this.all().find(({ subkeys }) => subkeys.find(skid => skid === id))
+    // return this.all()
+    //     .find(({public_}) => pgp.key.readArmored(public_).keys[0].subKeys
+    //         .find(sk => sk.subKey.getKeyId().toHex() === id))
     }
 
     static id(key) {
@@ -52,20 +51,20 @@ module.exports = class Keyring {
     }
 
     static formatId(keyId) {
-        return !!keyId ? keyId.toHex() : null
+        return keyId ? keyId.toHex() : null
     }
 
-    async add({private_, public_}) {
-        const {keys, err} = await pgp.key.readArmored(private_ || public_)
+    async add({ private_, public_ }) {
+        const { keys, err } = await pgp.key.readArmored(private_ || public_)
 
-        if(err)
-            throw err
+        if (err) { throw err }
 
         let added = 0
 
         const wait = keys.map(async k => {
             let public_, private_
-            if(k.isPrivate()) {
+
+            if (k.isPrivate()) {
                 private_ = k.armor()
                 public_ = k.toPublic().armor()
             } else {
@@ -76,13 +75,13 @@ module.exports = class Keyring {
 
             const found = this.storage.getData(id)
 
-            if(!found || (!!private_ && !found.private_)) {
+            if (!found || (!!private_ && !found.private_)) {
                 this.storage.setData(id, {
                     private_,
                     public_,
                     id,
                     addedAt: new Date().getTime(),
-                    ...await this._indexData({id, public_})
+                    ...await this._indexData({ id, public_ }),
                 }, true)
                 added++
             }
@@ -90,10 +89,9 @@ module.exports = class Keyring {
 
         await Promise.all(wait)
 
-        if(!!added) {
+        if (added) {
             await this.storage._save()
         }
-
 
         return added
     }
@@ -106,11 +104,11 @@ module.exports = class Keyring {
         return this.storage.clear()
     }
 
-    async generate({name, email, password, comment}) {
+    async generate({ name, email, password, comment }) {
         const key = await pgp.generateKey({
-            userIds: [{name, email, comment}],
+            userIds: [{ name, email, comment }],
             numBits: 4096,
-            passphrase: password
+            passphrase: password,
         })
 
         return this.add({
@@ -121,28 +119,27 @@ module.exports = class Keyring {
 
     async _updateSearchIndex(reindex = false) {
         await Promise.all(this.all().map(async key => {
-
-            if(!reindex && !!key.search)
-                return
+            if (!reindex && !!key.search) { return }
 
             this.storage.setData(key.id, {
                 ...key,
-                ...await this._indexData(key)
+                ...await this._indexData(key),
             }, true)
         }))
 
         return this.storage._save()
     }
 
-    async _indexData({id, public_}) {
+    async _indexData({ id, public_ }) {
         const k = (await pgp.key.readArmored(public_)).keys[0]
 
-        const users = k.users.map(({userId: {userid}}) => userid)
+        const users = k.users.map(({ userId: { userid } }) => userid)
         const info = users.join('\n')
         const fingerprint = k.getFingerprint()
         const created = k.getCreationTime()
-        const {subKeys} = k
+        const { subKeys } = k
         let expires = await k.getExpirationTime()
+
         expires = isFinite(expires) ? expires.getTime() : null
 
         const search = `${id} ${info.split('\n').join(' ')}`
@@ -154,21 +151,19 @@ module.exports = class Keyring {
             fingerprint,
             users,
             info,
-            subkeys: subKeys.map(sk => sk.getKeyId().toHex())
+            subkeys: subKeys.map(sk => sk.getKeyId().toHex()),
         }
     }
 
-    export_({private_: priv = true, public_: pub = true} = {}) {
+    export_({ private_: priv = true, public_: pub = true } = {}) {
         return this
             .find('')
-            .map(({private_, public_}) => {
+            .map(({ private_, public_ }) => {
                 const hasPrivate = !!private_
 
-                if(hasPrivate && priv)
-                    return private_
+                if (hasPrivate && priv) { return private_ }
 
-                if(pub)
-                    return public_
+                if (pub) { return public_ }
 
                 return null
             })

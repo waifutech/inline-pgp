@@ -1,21 +1,24 @@
-const path = require('path')
-const {CleanWebpackPlugin} = require('clean-webpack-plugin')
+/* eslint-disable import/no-commonjs */
 
-module.exports = (opts) => ({
+// const path = require('path')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+
+module.exports = (_opts) => ({
     mode: 'development',
     watch: true,
     devtool: 'source-map',
     output: {
         devtoolModuleFilenameTemplate: '[resourcePath]',
-        devtoolFallbackModuleFilenameTemplate: '[resourcePath]?[hash]'
+        devtoolFallbackModuleFilenameTemplate: '[resourcePath]?[hash]',
     },
     module: {
         rules: [
-            {test: /\.css$/,
+            {
+                test: /\.css$/,
                 loader: [
                     'style-loader',
-                    'css-loader?sourceMap'
-                ]
+                    'css-loader?sourceMap',
+                ],
             },
             {
                 test: /\.(scss|sass)$/,
@@ -30,23 +33,23 @@ module.exports = (opts) => ({
                             },
                             importLoaders: true,
                             url: false,
-                        }
+                        },
                     },
                     'resolve-url-loader',
                     'sass-loader?sourceMap',
                     {
                         loader: 'sass-resources-loader',
                         options: {
-                            resources: ['./app/vars.sass']
-                        }
+                            resources: ['./app/vars.sass'],
+                        },
                     },
-                ]
+                ],
             },
-        ]
+        ],
     },
     plugins: ([
         new CleanWebpackPlugin({
-            cleanBeforeEveryBuildPatterns: ['dist']
+            cleanBeforeEveryBuildPatterns: ['dist'],
         }),
-    ]).filter(p => !!p)
+    ]).filter(p => !!p),
 })

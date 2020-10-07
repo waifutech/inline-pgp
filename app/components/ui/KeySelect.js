@@ -1,46 +1,50 @@
-const React = require('react')
-const ReactDOM = require('react-dom')
-const Autocomplete = require('react-autocomplete')
+import React from 'react'
+import Autocomplete from 'react-autocomplete'
+import ReactDOM from 'react-dom'
 
-const KeyId = require('../KeyId')
-const Keyring = require('../../Keyring')
-const Settings = require('../../Settings')
+import Keyring from '../../Keyring'
+import Settings from '../../Settings'
+import KeyId from '../KeyId'
 
 const keys = () => Keyring.instance()
 
 class KeySelect extends React.Component {
     constructor() {
         super()
-        this.state = {options: [], query: null, focused: false}
+        this.state = { options: [], query: null, focused: false }
         setTimeout(() => this.query(''))
     }
 
     query(query) {
-        const {'private': p} = this.props
-        this.setState({query, options: keys().find(query, {'private': p})})
+        const { private: p } = this.props
+
+        this.setState({ query, options: keys().find(query, { private: p }) })
     }
 
     focusInput() {
-        ReactDOM.findDOMNode(this).querySelector('input').focus()
+        this.input().focus()
+    }
+
+    input() {
+        /* eslint-disable-next-line react/no-find-dom-node */
+        return ReactDOM.findDOMNode(this).querySelector('input')
     }
 
     blurInput() {
         try {
-            ReactDOM.findDOMNode(this).querySelector('input').blur()
-        } catch(err) {
+            this.input().blur()
+        } catch (err) {
             console.error(err)
         }
     }
 
     selectKey(id) {
-        const {currentEncryption, currentSign, onChange} = this.props
+        const { currentEncryption, currentSign, onChange } = this.props
 
         this.blurInput()
 
-        if(currentEncryption)
-            Settings.setCurrentEncryptionKey(id)
-        if(currentSign)
-            Settings.setCurrentSignKey(id)
+        if (currentEncryption) { Settings.setCurrentEncryptionKey(id) }
+        if (currentSign) { Settings.setCurrentSignKey(id) }
 
         onChange(id)
 
@@ -48,24 +52,25 @@ class KeySelect extends React.Component {
     }
 
     render() {
-        const {value, style, maxDropHeight} = this.props
-        const {options, query, focused} = this.state
+        const { value, style, maxDropHeight } = this.props
+        const { options, query, focused } = this.state
 
         return (
             <Autocomplete
-                getItemValue={({id}) => id}
+                getItemValue={({ id }) => id}
                 items={options}
-                renderItem={({id}, isHighlighted) =>
-                    <div key={id} style={{
-                        cursor: 'pointer',
-                        background: (id === value || isHighlighted) ? 'whitesmoke' : 'white',
-                        transition: 'background-color .15s',
-                        padding: '4px'
-                    }}>
+                renderItem={({ id }, isHighlighted) =>
+                    <div
+                        key={id} style={{
+                            cursor: 'pointer',
+                            background: (id === value || isHighlighted) ? 'whitesmoke' : 'white',
+                            transition: 'background-color .15s',
+                            padding: '4px',
+                        }}
+                    >
                         <KeyId>{id}</KeyId>
-                    </div>
-                }
-                renderInput={({onBlur, ...rest}) => {
+                    </div>}
+                renderInput={({ onBlur, ...rest }) => {
                     const displayId = (!!value && !focused)
 
                     return (<div style={{
@@ -74,16 +79,19 @@ class KeySelect extends React.Component {
                         padding: '1px',
                         // overflow: 'hidden',
                         boxSizing: 'border-box',
-                    }}>
+                    }}
+                    >
                         {displayId
-                            ? <KeyId key={value} style={{
-                                cursor: 'pointer',
-                                paddingTop: '2px',
-                                transform: 'scale(0.9) translateY(-2px)',
-                                transformOrigin: 'top left'
-                            }} onClick={() =>
-                                this.setState({focused: true}, () => this.focusInput())
-                            }>{value}</KeyId>
+                            ? <KeyId
+                                key={value} style={{
+                                    cursor: 'pointer',
+                                    paddingTop: '2px',
+                                    transform: 'scale(0.9) translateY(-2px)',
+                                    transformOrigin: 'top left',
+                                }} onClick={() =>
+                                    this.setState({ focused: true }, () => this.focusInput())}
+                            >{value}
+                            </KeyId>
                             : <input
                                 {...rest}
                                 style={{
@@ -91,9 +99,10 @@ class KeySelect extends React.Component {
                                     height: '40px',
                                 }}
                                 onBlur={(ev) => {
-                                    this.setState({focused: false})
+                                    this.setState({ focused: false })
                                     !!onBlur && onBlur(ev)
-                                }} />}
+                                }}
+                            />}
                     </div>)
                 }}
                 value={query == null ? value : query}
@@ -125,4 +134,4 @@ class KeySelect extends React.Component {
     }
 }
 
-module.exports = KeySelect
+export default KeySelect

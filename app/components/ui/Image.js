@@ -1,8 +1,8 @@
-const React = require('react')
+import React from 'react'
 
-const compactObject = require('../../utils/compactObject')
+import compactObject from '../../utils/compactObject'
 
-const Image = ({className, style, children, src, width, height, inline, size, ...rest}) => {
+const Image = ({ className, style, children, src, width, height, inline, size, ...rest }) => {
     const d = compactObject({
         width: width || size,
         height: height || size,
@@ -14,14 +14,13 @@ const Image = ({className, style, children, src, width, height, inline, size, ..
             position: 'relative',
             background: `url("${src}") center center / cover no-repeat`,
             maxWidth: '100%',
-            ...(inline ? {display: 'inline-block'} : {}),
+            ...(inline ? { display: 'inline-block' } : {}),
             ...d,
             ...style,
         }}
         {...rest}
-
-    >{children}</div>
-
+    >{children}
+    </div>
 }
 
-module.exports = Image
+export default Image

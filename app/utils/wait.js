@@ -1,3 +1,3 @@
-const wait = (time) => new Promise((resolve, reject) => setTimeout(() => resolve(), time))
+const wait = (time) => new Promise(resolve => setTimeout(resolve, time))
 
-module.exports = wait
+export default wait

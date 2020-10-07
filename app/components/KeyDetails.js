@@ -1,16 +1,17 @@
-const React = require('react')
-const { useEffect, useRef, useState } = React
-const pgp = require('../pgp')
+import React, { useEffect, useState } from 'react'
 
-const KeyId = require('./KeyId')
-const KeyIdView = require('./KeyIdView')
-const Textarea = require('./ui/Textarea')
-const {'default': Section} = require('./ui/Section')
-const {'default': Tab} = require('./ui/Tab')
-const Grid = require('./ui/Grid')
-const Fade = require('./ui/Fade')
-const Entry = require('./ui/Entry')
-const KeyInfo = require('./KeyInfo')
+
+import KeyId from './KeyId'
+import KeyIdView from './KeyIdView'
+import KeyInfo from './KeyInfo'
+import Entry from './ui/Entry'
+import Fade from './ui/Fade'
+import Grid from './ui/Grid'
+import Section from './ui/Section'
+import Tab from './ui/Tab'
+import Textarea from './ui/Textarea'
+
+import pgp from '../pgp'
 
 const KeyDetails = ({ id, private_, public_ }) => {
     const [showPrivate, setShowPrivate] = useState(false)
@@ -22,11 +23,10 @@ const KeyDetails = ({ id, private_, public_ }) => {
 
     const hasPrivate = !!private_
 
-    if(!key)
-        return <div />
+    if (!key) { return <div /> }
 
     const k = key.keys[0]
-    const {users, subKeys} = k
+    const { users, subKeys } = k
 
     return (
         <Grid n={1} padding={10}>
@@ -36,16 +36,16 @@ const KeyDetails = ({ id, private_, public_ }) => {
 
                     <KeyInfo key_={k} />
 
-                    <Entry name={'Users: '}>
+                    <Entry name='Users: '>
                         {users.map(u => (
-                            <div key={''+u.userId.userid}>
-                                {''+u.userId.userid}
+                            <div key={'' + u.userId.userid}>
+                                {'' + u.userId.userid}
                             </div>
                         ))}
                     </Entry>
 
-                    <Entry name={'Subkeys: '}>
-                        <Grid n={1} padding={6} style={{marginTop: '6px'}}>
+                    <Entry name='Subkeys: '>
+                        <Grid n={1} padding={6} style={{ marginTop: '6px' }}>
                             {subKeys.map(sk => <div key={sk.getKeyId().toHex()}>
                                 <KeyInfo key_={sk}><KeyIdView.Compact>{sk.getKeyId().toHex()}</KeyIdView.Compact></KeyInfo>
                             </div>)}
@@ -61,8 +61,8 @@ const KeyDetails = ({ id, private_, public_ }) => {
                         {hasPrivate && <Tab active={showPrivate} onClick={() => setShowPrivate(true)}>Private</Tab>}
                     </div>
                     <Fade>
-                        {!showPrivate && <Textarea key={'public'} copy code readOnly rows={12}>{public_}</Textarea>}
-                        {showPrivate && <Textarea key={'private'} copy code readOnly rows={12}>{private_}</Textarea>}
+                        {!showPrivate && <Textarea key='public' copy code readOnly rows={12}>{public_}</Textarea>}
+                        {showPrivate && <Textarea key='private' copy code readOnly rows={12}>{private_}</Textarea>}
                     </Fade>
                 </Grid>
             </Section>
@@ -70,4 +70,4 @@ const KeyDetails = ({ id, private_, public_ }) => {
     )
 }
 
-module.exports = KeyDetails
+export default KeyDetails

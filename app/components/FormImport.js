@@ -1,20 +1,21 @@
-const React = require('react')
-const flatten = require('lodash.flatten')
+import flatten from 'lodash.flatten'
+import React from 'react'
 
-const pgp = require('../pgp')
 
-const Grid = require('./ui/Grid')
-const {'default': Section} = require('./ui/Section')
-const {'default': Button} = require('./ui/Button')
-const {'default': FileInput} = require('./ui/FileInput')
-const Textarea = require('./ui/Textarea')
-const toast = require('./ui/Toast')
-const {publicKeyBlockRx, privateKeyBlockRx} = require('../utils/replacePgp')
+import Button from './ui/Button'
+import FileInput from './ui/FileInput'
+import Grid from './ui/Grid'
+import Section from './ui/Section'
+import Textarea from './ui/Textarea'
+import toast from './ui/Toast'
 
-module.exports = class ImportForm extends React.Component {
+import pgp from '../pgp'
+import { publicKeyBlockRx, privateKeyBlockRx } from '../utils/replacePgp'
+
+export default class ImportForm extends React.Component {
     constructor() {
         super()
-        this.state = {block: ''}
+        this.state = { block: '' }
     }
 
     async parseKeys(source) {
@@ -22,15 +23,15 @@ module.exports = class ImportForm extends React.Component {
             let match, ret = []
 
             while (match = rx.exec(source)) {
-                const {err, keys} = await pgp.key.readArmored(match[0])
+                const { err, keys } = await pgp.key.readArmored(match[0])
 
                 if (err) {
-                    console.log(err)
+                    console.error(err)
                     toast(`Could not read pgp block: ${err}`)
                 }
 
                 keys.forEach(k => {
-                    ret.push({[k.isPrivate() ? 'private_' : 'public_']: k.armor()})
+                    ret.push({ [k.isPrivate() ? 'private_' : 'public_']: k.armor() })
                 })
             }
 
@@ -41,8 +42,8 @@ module.exports = class ImportForm extends React.Component {
     }
 
     render() {
-        const {block} = this.state
-        const {onSubmit} = this.props
+        const { block } = this.state
+        const { onSubmit } = this.props
 
         return (
             <Section>
@@ -57,18 +58,19 @@ module.exports = class ImportForm extends React.Component {
                                 code focus required rows={10}
                                 placeholder={'PGP blocks'}
                                 value={block}
-                                onChange={block => this.setState({block})}
+                                onChange={block => this.setState({ block })}
                             />
                             <div>
-                                <a style={{float: 'left'}}><FileInput onUpload={f => {
+                                <a style={{ float: 'left' }}><FileInput onUpload={f => {
                                     const reader = new FileReader()
+
                                     reader.onload = ev =>
                                         onSubmit(this.parseKeys(ev.target.result))
                                     reader.readAsText(f)
                                 }}>Import from file</FileInput></a>
 
-                                <Button primary type='submit' value={'Import'} style={{float: 'right'}}/>
-                                <div style={{clear: 'both'}} />
+                                <Button primary type='submit' value={'Import'} style={{ float: 'right' }}/>
+                                <div style={{ clear: 'both' }} />
                             </div>
                         </Grid>
                     </fieldset>

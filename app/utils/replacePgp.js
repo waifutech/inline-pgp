@@ -1,7 +1,7 @@
-const escape = require('escape-html')
+import escape from 'escape-html'
 
-const replace = require('./replace')
-const innertext = require('./innertext')
+import innertext from './innertext'
+import replace from './replace'
 // const pgp = require('../pgp')
 
 const fixBlock = (str) => {
@@ -10,17 +10,15 @@ const fixBlock = (str) => {
         .map(line => line.trim())
         .filter(line => !!line)
         .map((line, i, arr) => {
-            if(i === 0)
-                return line
+            if (i === 0) { return line }
 
-            if(
+            if (
                 !arr[i].includes(':') &&
                 (
-                    arr[i-1].includes(':') || //last header
-                    i === 1 //message without headers
+                    arr[i - 1].includes(':') || // last header
+                    i === 1 // message without headers
                 )
-            )
-                return '\n' + line
+            ) { return '\n' + line }
 
             return line
         })
@@ -28,7 +26,7 @@ const fixBlock = (str) => {
     return escape(ret.join('\n'))
 }
 
-const validateBlock = async (str) => {
+const validateBlock = async (_str) => {
     return true
     // try {
     //     await pgp.message.readArmored(str)
@@ -43,8 +41,9 @@ export const msgBlockRx = () => /-----BEGIN PGP MESSAGE-----.+?-----END PGP MESS
 export const publicKeyBlockRx = () => /-----BEGIN PGP PUBLIC KEY BLOCK-----.+?-----END PGP PUBLIC KEY BLOCK-----/gms
 export const privateKeyBlockRx = () => /-----BEGIN PGP PRIVATE KEY BLOCK-----.+?-----END PGP PRIVATE KEY BLOCK-----/gms
 
-export const replacePgp = (rx, replaceFn) => (str) => replace(str, rx,(original, match) => {
+export const replacePgp = (rx, replaceFn) => (str) => replace(str, rx, (original, match) => {
     const block = fixBlock(innertext(original))
+
     return validateBlock(block) ? replaceFn(block, match) : original
 })
 

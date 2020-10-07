@@ -1,20 +1,20 @@
-const React = require('react')
+import React from 'react'
 
-const Settings = require('../Settings')
-const {'default': Section} = require('./ui/Section')
-const {'default': Button} = require('./ui/Button')
-const Textarea = require('./ui/Textarea')
-const Field = require('./ui/Field')
-const Grid = require('./ui/Grid')
-const {'default': Checkbox} = require('./ui/Checkbox')
-const toast = require('./ui/Toast')
+import Button from './ui/Button'
+import Checkbox from './ui/Checkbox'
+import Field from './ui/Field'
+import Grid from './ui/Grid'
+import Section from './ui/Section'
+import Textarea from './ui/Textarea'
+import toast from './ui/Toast'
 
-const Storage = require('../Storage')
+import Settings from '../Settings'
+import Storage from '../Storage'
 
 class TabSettings extends React.Component {
     constructor() {
         super()
-        this.state = {v: 0}
+        this.state = { v: 0 }
     }
 
     componentDidMount() {
@@ -29,7 +29,7 @@ class TabSettings extends React.Component {
     }
 
     async save() {
-        const {notransform, disableOnPages} = this.state
+        const { notransform, disableOnPages } = this.state
 
         await Settings.setDisabledPages(disableOnPages)
         await Settings.setNotransform(notransform)
@@ -40,11 +40,11 @@ class TabSettings extends React.Component {
     }
 
     refresh() {
-        this.setState({v: ++this.state.v})
+        this.setState({ v: this.state.v + 1 })
     }
 
     render() {
-        const {notransform, disableOnPages} = this.state
+        const { disableOnPages } = this.state
 
         return (
             <Section>
@@ -72,47 +72,56 @@ class TabSettings extends React.Component {
                         </Field.Label>
                     </Field>
                     <Field>
-                        <Field.Label>Disable on pages <span style={{color: 'grey'}}>(supports url wildcrads, one per line)</span></Field.Label>
+                        <Field.Label>Disable on pages <span style={{ color: 'grey' }}>(supports url wildcrads, one per line)</span></Field.Label>
                         <Textarea
                             rows={8}
-                            onChange={disableOnPages => this.setState({disableOnPages})}
+                            onChange={disableOnPages => this.setState({ disableOnPages })}
                             value={disableOnPages}
                             onBlur={() => this.save()}
                         />
                     </Field>
-                    {/*<Field>*/}
-                        {/*<Field.Label>notransform</Field.Label>*/}
-                        {/*<Textarea*/}
-                            {/*rows={8}*/}
-                            {/*onChange={notransform => this.setState({notransform})}*/}
-                            {/*value={notransform}*/}
-                            {/*onBlur={() => this.save()}*/}
-                        {/*/>*/}
-                    {/*</Field>*/}
+                    {/* <Field> */}
+                    {/* <Field.Label>notransform</Field.Label> */}
+                    {/* <Textarea */}
+                    {/* rows={8} */}
+                    {/* onChange={notransform => this.setState({notransform})} */}
+                    {/* value={notransform} */}
+                    {/* onBlur={() => this.save()} */}
+                    {/* /> */}
+                    {/* </Field> */}
                     <Field>
-                        <Button primary onClick={() => {
-                            if(confirm('Are you sure you want to delete stored passwords?')) {
-                                Storage.session().clear()
-                                toast('Stored passwords deleted')
-                            }
-                        }}>Delete stored passwords</Button>
+                        <Button
+                            primary onClick={() => {
+                                if (confirm('Are you sure you want to delete stored passwords?')) {
+                                    Storage.session().clear()
+                                    toast('Stored passwords deleted')
+                                }
+                            }}
+                        >Delete stored passwords
+                        </Button>
                     </Field>
                     <Field>
-                        <Button primary onClick={async () => {
-                            if(confirm('Are you sure you want to reset settings?')) {
-                                await Settings.reset()
-                                this.refresh()
-                                toast('Done')
-                            }
-                        }}>Reset settings</Button>
+                        <Button
+                            primary onClick={async () => {
+                                if (confirm('Are you sure you want to reset settings?')) {
+                                    await Settings.reset()
+                                    this.refresh()
+                                    toast('Done')
+                                }
+                            }}
+                        >Reset settings
+                        </Button>
                     </Field>
                     <Field>
-                        <Button dangerous primary onClick={() => {
-                            if(confirm('Are you sure you want to delete all keys?')) {
-                                Storage.keys().clear()
-                                toast('All keys deleted')
-                            }
-                        }}>Delete all keys</Button>
+                        <Button
+                            dangerous primary onClick={() => {
+                                if (confirm('Are you sure you want to delete all keys?')) {
+                                    Storage.keys().clear()
+                                    toast('All keys deleted')
+                                }
+                            }}
+                        >Delete all keys
+                        </Button>
                     </Field>
                 </Grid>
             </Section>
@@ -120,4 +129,4 @@ class TabSettings extends React.Component {
     }
 }
 
-module.exports = TabSettings
+export default TabSettings

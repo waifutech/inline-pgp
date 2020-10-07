@@ -1,15 +1,15 @@
+import isString from 'lodash.isstring'
 import React from 'react'
 import { v4 as uuid } from 'uuid'
-import isString from 'lodash.isstring'
 
 export default class FileInput extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {id: uuid()}
+        this.state = { id: uuid() }
     }
 
     async upload(ev) {
-        const {onUpload} = this.props
+        const { onUpload } = this.props
 
         const ret = Promise.all(([...(this.__upload.files)]).map(async f => {
             return onUpload(f, ev)
@@ -21,12 +21,11 @@ export default class FileInput extends React.Component {
     }
 
     render() {
-        const {id} = this.state
-        let {multiple, children, onUpload, ...rest} = this.props
+        const { id } = this.state
+        let { multiple, children, onUpload, ...rest } = this.props
 
-        if(!children || isString(children)) {
-            if(!children)
-                children = `Upload file${multiple ? 's' : ''}`
+        if (!children || isString(children)) {
+            if (!children) { children = `Upload file${multiple ? 's' : ''}` }
             children = <span>{children}</span>
         }
 
@@ -43,12 +42,12 @@ export default class FileInput extends React.Component {
                         zIndex: -1,
                     }}
                     id={id}
-                    name="file"
-                    type="file"
+                    name='file'
+                    type='file'
                     ref={dom => this.__upload = dom}
                     onChange={this.upload.bind(this)}
                 />
-                <label htmlFor={id} style={{width: '100%', cursor: 'pointer'}}>{children}</label>
+                <label htmlFor={id} style={{ width: '100%', cursor: 'pointer' }}>{children}</label>
             </div>
         )
     }

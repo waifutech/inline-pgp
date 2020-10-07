@@ -1,6 +1,8 @@
-const React = require('react')
-const cn = require('classnames')
+import cn from 'classnames'
+import React from 'react'
 
-const style = require('./icon.sass')
+import style from './icon.sass'
 
-module.exports = ({className, children, ...rest}) => (<i className={cn(style.icon, 'material-icons', className)} {...rest}>{children}</i>)
+const Icon = ({ className, children, ...rest }) => (<i className={cn(style.icon, 'material-icons', className)} {...rest}>{children}</i>)
+
+export default Icon

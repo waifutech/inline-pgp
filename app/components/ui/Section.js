@@ -1,5 +1,8 @@
-const React = require('react')
+import React from 'react'
 
 import style from './section.sass'
 
-export default ({children, ...rest}) => <div className={style.section} {...rest}>{children}</div>
+
+const Section = ({ children, ...rest }) => <div className={style.section} {...rest}>{children}</div>
+
+export default Section

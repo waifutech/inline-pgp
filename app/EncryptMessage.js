@@ -1,5 +1,5 @@
-const pgp = require('./pgp')
-const Passwords = require('./components/Passwords')
+import Passwords from './components/Passwords'
+import pgp from './pgp'
 
 class EncryptMessage {
     constructor(plaintext, encrypt, sign) {
@@ -9,35 +9,35 @@ class EncryptMessage {
     }
 
     async perform() {
-        const {plaintext, encrypt, sign} = this
+        const { plaintext, encrypt, sign } = this
 
         const encryptionKey = (encrypt || {}).public_
 
-        if(!encryptionKey)
-            throw new Error('No encryption key provided')
+        if (!encryptionKey) { throw new Error('No encryption key provided') }
 
         let data = {
             message: pgp.message.fromText(plaintext.toString()),
             publicKeys: (await pgp.key.readArmored(encryptionKey)).keys,
         }
 
-        if(!!sign) {
-            const {id, private_: signKey} = (sign || {})
+        if (sign) {
+            const { id, private_: signKey } = (sign || {})
 
             const password = await Passwords.ensurePassword(id)
 
-            if(!!signKey && !!password) {
+            if (!!signKey && !!password) {
                 try {
                     const keys = await Promise.all((await pgp.key.readArmored(signKey)).keys.map(async k => {
                         await k.decrypt(password)
+
                         return k
                     }))
 
                     data = {
                         ...data,
-                        privateKeys: keys
+                        privateKeys: keys,
                     }
-                } catch(err) {
+                } catch (err) {
                     console.error(err)
                 }
             }
@@ -45,10 +45,10 @@ class EncryptMessage {
 
         this.result = await pgp.encrypt(data)
 
-        const {data: encrypted} = this.result
+        const { data: encrypted } = this.result
 
         return encrypted
     }
 }
 
-module.exports = EncryptMessage
+export default EncryptMessage

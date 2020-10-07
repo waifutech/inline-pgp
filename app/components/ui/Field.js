@@ -1,16 +1,17 @@
-const React = require('react')
+import React from 'react'
 
-const Fade = require('./Fade')
+import Fade from './Fade'
+import style from './field.sass'
 
-const style = require('./field.sass')
-
-const Field = ({children, error, ...rest}) => (
+const Field = ({ children, error, ...rest }) => (
     <div className={style.field} {...rest}>
         {children}
         <Fade>{error && <div className={style.field__error}>{error}</div>}</Fade>
     </div>
 )
 
-Field.Label = ({children, ...rest}) => <label {...rest} className={style.label}>{children}</label>
+const Label = ({ children, ...rest }) => <label {...rest} className={style.label}>{children}</label>
 
-module.exports = Field
+Field.Label = Label
+
+export default Field

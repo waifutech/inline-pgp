@@ -1,19 +1,22 @@
+/* eslint-disable import/no-commonjs */
+
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
-module.exports = (opts) => ({
+module.exports = (_opts) => ({
     mode: 'production',
     output: {
         filename: './[name]-build.js',
         chunkFilename: '[name]-build.js',
-        publicPath: '/dist/'
+        publicPath: '/dist/',
     },
     module: {
         rules: [
-            {test: /\.css$/,
+            {
+                test: /\.css$/,
                 loader: [
                     'style-loader',
-                    'css-loader?sourceMap'
-                ]
+                    'css-loader?sourceMap',
+                ],
             },
             {
                 test: /\.(scss|sass)$/,
@@ -26,8 +29,8 @@ module.exports = (opts) => ({
                                 localIdentName: '[name]__[local]__[hash:base64:5]',
                             },
                             importLoaders: 3,
-                            url: false,
-                        }
+                            // url: false,
+                        },
                     },
                     'postcss-loader?sourceMap=true',
                     'resolve-url-loader',
@@ -35,12 +38,12 @@ module.exports = (opts) => ({
                     {
                         loader: 'sass-resources-loader',
                         options: {
-                            resources: ['./app/vars.sass']
-                        }
+                            resources: ['./app/vars.sass'],
+                        },
                     },
-                ]
+                ],
             },
-        ]
+        ],
     },
 
     optimization: {
@@ -55,5 +58,5 @@ module.exports = (opts) => ({
         // new CompressionPlugin({
         //     test: /\.js$|\.css$/
         // }),
-    ]).filter(p => !!p)
+    ]).filter(p => !!p),
 })

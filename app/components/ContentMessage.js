@@ -1,28 +1,27 @@
-const React = require('react')
-const urlRx = require('url-regex')
+import React from 'react'
+import urlRx from 'url-regex'
 const { useEffect, useState, useCallback, Fragment } = React
 
-const KeyId = require('./KeyId')
-const SubkeyId = require('./SubkeyId')
-const Image = require('./ui/Image')
-const Textarea = require('./ui/Textarea')
-const Icon = require('./ui/Icon')
-const Link = require('./ui/Link')
-const {'default': Section} = require('./ui/Section')
-const toast = require('./ui/Toast')
-const ContentKey = require('./ContentKey')
-const Passwords = require('./Passwords')
-const replace = require('../utils/replace')
-const dataUriRx = require('../utils/dataUriRx')
-const {'default': bem} = require('../utils/bem')
+import ContentKey from './ContentKey'
+import style from './inline-content.sass'
+import KeyId from './KeyId'
+import Passwords from './Passwords'
+import SubkeyId from './SubkeyId'
+import Icon from './ui/Icon'
+import Image from './ui/Image'
+import Link from './ui/Link'
+import Section from './ui/Section'
+import Textarea from './ui/Textarea'
+import toast from './ui/Toast'
 
-const KeyStorage = require('../Keyring')
-const Storage = require('../Storage')
-const DecryptMessage = require('../DecryptMessage')
-const {replacePgpMessages, replacePgpPublicKeys, replacePgpPrivateKeys} = require('../utils/replacePgp')
-
-const style = require('./inline-content.sass')
-const Spinner = require('../svg/Spinner.svg')
+import DecryptMessage from '../DecryptMessage'
+import KeyStorage from '../Keyring'
+import Storage from '../Storage'
+import Spinner from '../svg/Spinner.svg'
+import bem from '../utils/bem'
+import dataUriRx from '../utils/dataUriRx'
+import replace from '../utils/replace'
+import { replacePgpMessages, replacePgpPublicKeys, replacePgpPrivateKeys } from '../utils/replacePgp'
 
 const c = bem(style)('inline-content')
 const p = bem(style)('preview')
@@ -30,12 +29,12 @@ const p = bem(style)('preview')
 const replaceNewLines = (input) => replace(input, '\n', (original, match) => <br key={match.index}/>)
 
 const replaceWithLinks = rx => input => replace(input, rx, (original, match) =>
-    <a href={original} key={'link-' + match.index} target="_blank" rel="nofollow noopener">{original}</a>
+    <a href={original} key={'link-' + match.index} target="_blank" rel="noreferrer nofollow noopener">{original}</a>,
 )
 
 const replaceUrls = replaceWithLinks(urlRx())
 
-const replaceFiles = (input) => replace(input, dataUriRx(),(original, match) => {
+const replaceFiles = (input) => replace(input, dataUriRx(), (original, match) => {
     let filename = 'file'
 
     const contentType = match[2]
@@ -44,21 +43,20 @@ const replaceFiles = (input) => replace(input, dataUriRx(),(original, match) => 
         .split(';')
         .filter(p => !!p && p.includes('='))
         .map(p => p.split('='))
-        .reduce((acc, next) => ({...acc, [next[0]]: decodeURI(next[1])}), {})
+        .reduce((acc, next) => ({ ...acc, [next[0]]: decodeURI(next[1]) }), {})
 
     filename = params.filename || filename
 
-    const title = <span><Icon style={{color: 'black', position: 'relative', left: '-4px'}}>attach_file</Icon> {filename}</span>
+    const title = <span><Icon style={{ color: 'black', position: 'relative', left: '-4px' }}>attach_file</Icon> {filename}</span>
 
-    return <a download={filename} href={original} key={'file-' + match.index} target="_blank" title={'Download file'} rel="nofollow noopener">
+    return <a download={filename} href={original} key={'file-' + match.index} target="_blank" title={'Download file'} rel="noreferrer nofollow noopener">
         {contentType.startsWith('image/')
             ? (
                 <div className={p()}>
-                    <Image className={p('image')} src={original} size={'160px'} style={{marginBottom: '4px'}} />
+                    <Image className={p('image')} src={original} size={'160px'} style={{ marginBottom: '4px' }} />
                     {title}
                 </div>
-            ) : title
-        }
+            ) : title}
     </a>
 })
 
@@ -70,13 +68,13 @@ const replacePgpStuff = (text) => {
     return text
 }
 
-const ContentMessage = ({messageBlock: ciphertext}) => {
+const ContentMessage = ({ messageBlock: ciphertext }) => {
     const [plaintext, setPlaintext] = useState()
     const [signatures, setSignatures] = useState()
     const [keyId, setKeyId] = useState()
     const [inited, setInited] = useState(false)
     const [displayRaw, setDisplayRaw] = useState(false)
-    const [error, setError] = useState()
+    const [, setError] = useState()
 
     const decrypt = useCallback(async () => {
         let keyId, hasKey = false
@@ -86,16 +84,17 @@ const ContentMessage = ({messageBlock: ciphertext}) => {
         try {
             keyId = await decrypt.getKeyId()
             const key = await decrypt.pickKey()
+
             hasKey = !!key
 
-            if(hasKey && !!key.private_) {
-                await Passwords.ensurePassword(key.id, {dialog: 'small'})
+            if (hasKey && !!key.private_) {
+                await Passwords.ensurePassword(key.id, { dialog: 'small' })
                 await Passwords.close()
             }
 
-            let {signatures, data: plaintext} = await decrypt.perform()
+            let { signatures, data: plaintext } = await decrypt.perform()
 
-            if(!!plaintext) {
+            if (!!plaintext) {
                 const displayPlaintext = (
                     <Fragment>
                         {
@@ -107,11 +106,12 @@ const ContentMessage = ({messageBlock: ciphertext}) => {
                         }
                     </Fragment>
                 )
+
                 setPlaintext(displayPlaintext)
-                signatures = signatures.map(({keyid, valid}) => ({id: KeyStorage.formatId(keyid), valid}))
+                signatures = signatures.map(({ keyid, valid }) => ({ id: KeyStorage.formatId(keyid), valid }))
                 setSignatures(signatures)
             }
-        } catch(err) {
+        } catch (err) {
             toast(err.message)
             console.error(err)
             setError(err)
@@ -123,6 +123,7 @@ const ContentMessage = ({messageBlock: ciphertext}) => {
 
     useEffect(() => {
         const check = () => !plaintext && decrypt()
+
         Storage.session().subscribeChange(check)
         Storage.keys().subscribeChange(check)
         // window.onfocus = this._check
@@ -132,14 +133,14 @@ const ContentMessage = ({messageBlock: ciphertext}) => {
             Storage.session().unsubscribeChange(check)
             Storage.keys().unsubscribeChange(check)
         }
-    }, [decrypt])
+    }, [decrypt, plaintext])
 
-    if(!inited) return <div className={'center'}><Spinner size={32}/></div>
+    if (!inited) return <div className={'center'}><Spinner size={32}/></div>
 
     const decrypted = !!plaintext
 
     return (
-        <div className={c({err: !decrypted, ok: decrypted})}>
+        <div className={c({ err: !decrypted, ok: decrypted })}>
             <div>
                 <div className={c('actions')}>
                     <Link disabled={!displayRaw} onClick={() => setDisplayRaw(false)}><b>Decrypted</b></Link>
@@ -147,32 +148,30 @@ const ContentMessage = ({messageBlock: ciphertext}) => {
                     <Link disabled={displayRaw} onClick={() => setDisplayRaw(true)}><b>Raw</b></Link>
                 </div>
                 {signatures &&
-                <div title={'Signed'} style={{marginTop: '10px'}}>{([...signatures].map(({id, valid}) =>
-                    <div key={id}>
-                        <div style={{marginBottom: '5px', display: 'inline-block'}}>
-                            <KeyId warn={!valid ? 'Invalid or unknown signature' : null}>{id}</KeyId>
-                        </div>
-                    </div>
-                ))}</div>
-                }
+                    <div title={'Signed'} style={{ marginTop: '10px' }}>{([...signatures].map(({ id, valid }) =>
+                        <div key={id}>
+                            <div style={{ marginBottom: '5px', display: 'inline-block' }}>
+                                <KeyId warn={!valid ? 'Invalid or unknown signature' : null}>{id}</KeyId>
+                            </div>
+                        </div>,
+                    ))}</div>}
             </div>
 
-            <Section style={{margin: '10px 0'}}>
+            <Section style={{ margin: '10px 0' }}>
                 {!displayRaw
                     ? <div style={{
                         overflowWrap: 'break-word',
                         wordWrap: 'break-word',
                         wordBreak: 'break-word',
                     }}>{decrypted
-                        ? plaintext
-                        : (
-                            <div><span><i>
-                                <span style={{color: 'grey'}}>Encrypted message</span> <a onClick={decrypt}>Decrypt</a>
-                            </i></span></div>
-                        )
-                    }</div>
+                            ? plaintext
+                            : (
+                                <div><span><i>
+                                    <span style={{ color: 'grey' }}>Encrypted message</span> <a onClick={decrypt}>Decrypt</a>
+                                </i></span></div>
+                            )}</div>
                     : <div>
-                        <Textarea rows={8} copy code style={{resize: 'vertical'}}>{ciphertext}</Textarea>
+                        <Textarea rows={8} copy code style={{ resize: 'vertical' }}>{ciphertext}</Textarea>
                     </div>}
             </Section>
             <div title={'Encrypted'}>
@@ -182,4 +181,4 @@ const ContentMessage = ({messageBlock: ciphertext}) => {
     )
 }
 
-module.exports = ContentMessage
+export default ContentMessage

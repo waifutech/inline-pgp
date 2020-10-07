@@ -1,9 +1,11 @@
-const React = require('react')
-const useKey = require('../utils/useKey')
+import React from 'react'
 
-const KeyIdView = require('./KeyIdView')
+import KeyIdView from './KeyIdView'
 
-const KeyId = ({children, ...rest}) => {
+import useKey from '../utils/useKey'
+
+
+const KeyId = ({ children, ...rest }) => {
     const key = useKey(children)
 
     return (
@@ -11,4 +13,4 @@ const KeyId = ({children, ...rest}) => {
     )
 }
 
-module.exports = KeyId
+export default KeyId
